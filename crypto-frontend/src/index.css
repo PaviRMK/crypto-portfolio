@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #1e1e2f, #2b1055);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Wrapper */
+.auth-wrapper {
+  width: 90%;
+  max-width: 1100px;
+  height: 600px;
+  background: #ffffff;
+  border-radius: 20px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+/* Left Section */
+.left-section {
+  flex: 1;
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.left-section h1 {
+  font-size: 36px;
+  color: #2b1055;
+  margin-bottom: 10px;
+}
+
+.left-section p {
+  margin-bottom: 30px;
+  color: #555;
+}
+
+.left-section form {
+  display: flex;
+  flex-direction: column;
+}
+
+.left-section input {
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.left-section input:focus {
+  outline: none;
+  border-color: #7b2ff7;
+}
+
+.left-section button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #7b2ff7, #f107a3);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.left-section button:hover {
+  opacity: 0.9;
+}
+
+.switch {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.switch a {
+  color: #7b2ff7;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Right Section */
+.right-section {
+  flex: 1;
+  background: linear-gradient(135deg, #7b2ff7, #f107a3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.right-section img {
+  width: 100%;
+  max-width: 400px;
+}
+
+.message {
+  margin-top: 15px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.message.success {
+  color: #1db954;   /* Green */
+}
+
+.message.error {
+  color: #ff4d4d;   /* Red */
+}
