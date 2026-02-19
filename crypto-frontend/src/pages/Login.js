@@ -2,14 +2,21 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import cryptoImage from "../assets/crypto.png";
 import API from "../api";
+import { useNavigate } from "react-router-dom";
+import "../styles/pages/login.css";
+
 
 
 function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
 
- const handleSubmit = async (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
   e.preventDefault();
 
   try {
@@ -19,22 +26,36 @@ function Login() {
     });
 
     // Store JWT token
-    localStorage.setItem("token", response.data);
-    
-    alert("Login Successful");
+    if (response.status === 200) {
+        localStorage.setItem("token", response.data);
+
+        setMessage("Login Successful");
+        setMessageType("success");
+        
+        setTimeout(() => {
+            navigate("/dashboard");
+        }, 1000);
+    }
 
   } catch (error) {
-    alert("Invalid Credentials");
+    setMessage("Invalid Credentials");
+    setMessageType("error");
   }
 };
 
 
   return (
+    <div className="auth-page">
     <div className="auth-wrapper">
 
-      <div className="left-section">
+      <div className="auth-left">
         <h1>Welcome Back</h1>
         <p>Access your Crypto Portfolio securely</p>
+        {message && (
+        <p className={messageType === "success" ? "success-msg" : "error-msg"}>
+          {message}
+        </p>
+      )}
 
         <form onSubmit={handleSubmit}>
           <input
@@ -61,10 +82,11 @@ function Login() {
         </p>
       </div>
 
-      <div className="right-section">
+      <div className="auth-right">
         <img src={cryptoImage} alt="Crypto Illustration" />
       </div>
 
+    </div>
     </div>
   );
 }

@@ -1,0 +1,10 @@
+:root {
+  --primary-gradient: linear-gradient(135deg, #7b2ff7, #f107a3);
+  --dark-bg: #0f172a;
+  --card-bg: rgba(30, 41, 59, 0.6);
+  --border-color: #334155;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --text-light: #cbd5e1;
+  --white: #ffffff;
+}

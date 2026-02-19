@@ -1,0 +1,89 @@
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-gradient);
+  padding: 40px;
+}
+
+.register-wrapper {
+  width: 100%;
+  max-width: 1050px;
+  height: 600px;
+  background: #ffffff;
+  border-radius: 20px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+}
+
+/* LEFT SIDE */
+.register-left {
+  flex: 0 0 50%;
+  padding: 60px 55px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.register-left h1 {
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #1e293b;
+}
+
+.register-left p {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 30px;
+}
+
+.register-left form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.register-left input {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.register-left input:focus {
+  outline: none;
+  border-color: #7b2ff7;
+  box-shadow: 0 0 0 3px rgba(123,47,247,0.15);
+}
+
+.register-left button {
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary-gradient);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.register-left button:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+/* RIGHT SIDE */
+.register-right {
+  flex: 0 0 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-right img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import cryptoImage from "../assets/crypto.png";
 import API from "../api";
+import "../styles/pages/register.css";
+
 
 
 function Register() {
@@ -44,9 +46,10 @@ function Register() {
 
 
   return (
+    <div className="auth-page">
     <div className="auth-wrapper">
 
-      <div className="left-section">
+      <div className="register-left">
         <h1>Create Account</h1>
         <p>Start managing your Crypto Portfolio</p>
 
@@ -92,10 +95,11 @@ function Register() {
         </p>
       </div>
 
-      <div className="right-section">
+      <div className="register-right">
         <img src={cryptoImage} alt="Crypto Illustration" />
       </div>
 
+    </div>
     </div>
   );
 }

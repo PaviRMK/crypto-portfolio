@@ -1,0 +1,44 @@
+.dashboard-page {
+  min-height: 100vh;
+  background: var(--dark-bg);
+  padding: 60px 100px;
+}
+
+/* Header */
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.dashboard-header h2 {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.logout-btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--white);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.logout-btn:hover {
+  background: var(--border-color);
+}
+
+/* Cards */
+
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 35px;
+  margin-bottom: 35px;
+}
