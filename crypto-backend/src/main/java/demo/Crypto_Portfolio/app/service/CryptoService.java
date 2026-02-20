@@ -56,4 +56,13 @@ public class CryptoService {
             throw new RuntimeException("Error fetching chart data", e);
         }
     }
+    // EXCHANGE & TRADE DETAILS
+    public String getExchangeDetails(String coinId) {
+
+        String url = "https://api.coingecko.com/api/v3/coins/"
+                + coinId
+                + "/tickers";
+
+        return restTemplate.getForObject(url, String.class);
+    }
 }
