@@ -5,6 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import demo.Crypto_Portfolio.app.model.ExchangeDTO;
+
 
 import java.util.List;
 
@@ -57,12 +62,51 @@ public class CryptoService {
         }
     }
     // EXCHANGE & TRADE DETAILS
-    public String getExchangeDetails(String coinId) {
+    public List<ExchangeDTO> getExchangeDetails(String coinId) {
 
         String url = "https://api.coingecko.com/api/v3/coins/"
-                + coinId
-                + "/tickers";
+                + coinId + "/tickers";
 
-        return restTemplate.getForObject(url, String.class);
+        try {
+            String response = restTemplate.getForObject(url, String.class);
+            JsonNode root = objectMapper.readTree(response);
+            JsonNode tickers = root.get("tickers");
+            if (tickers == null || !tickers.isArray()) {
+                return new ArrayList<>();
+            }
+
+            List<ExchangeDTO> exchangeList = new ArrayList<>();
+
+            int limit = Math.min(5, tickers.size()); // Top 5 only
+
+            for (int i = 0; i < limit; i++) {
+
+                JsonNode ticker = tickers.get(i);
+
+                String exchangeName = ticker.get("market").get("name").asText();
+                String base = ticker.get("base").asText();
+                String target = ticker.get("target").asText();
+                double lastPrice = ticker.get("last").asDouble();
+                double volume = ticker.get("volume").asDouble();
+                String trustScore = ticker.get("trust_score").asText();
+
+                String pair = base + "/" + target;
+
+                exchangeList.add(new ExchangeDTO(
+                        exchangeName,
+                        pair,
+                        lastPrice,
+                        volume,
+                        trustScore
+                ));
+            }
+
+            return exchangeList;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching exchange data", e);
+        }
     }
+
 }
+

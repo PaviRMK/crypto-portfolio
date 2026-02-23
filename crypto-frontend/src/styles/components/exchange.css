@@ -1,0 +1,76 @@
+.exchange-container {
+  margin-top: 30px;
+  animation: fadeSlide 0.3s ease-in-out;
+}
+
+.exchange-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+/* Table */
+.exchange-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.exchange-table th {
+  text-align: left;
+  padding: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-light);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.exchange-table td {
+  padding: 18px;
+  font-size: 14px;
+  border-bottom: 1px solid #1e293b;
+  color: #ffffff;
+}
+
+.exchange-table tr:hover {
+  background: #1e293b;
+  transition: 0.2s;
+}
+
+/* Trust Badge */
+.trust {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.trust.green {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+}
+
+.trust.red {
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+}
+
+.trust.yellow {
+  background: rgba(234,179,8,0.15);
+  color: #eab308;
+}
+
+/* Smooth Animation */
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
