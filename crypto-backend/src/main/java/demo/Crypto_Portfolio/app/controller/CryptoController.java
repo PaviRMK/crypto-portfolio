@@ -4,6 +4,8 @@ import demo.Crypto_Portfolio.app.service.CryptoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import demo.Crypto_Portfolio.app.model.ExchangeDTO;
 
 @RestController
 @RequestMapping("/api/crypto")
@@ -30,6 +32,14 @@ public class CryptoController {
     ) {
         return ResponseEntity.ok(
                 cryptoService.getTopCoins(currency, perPage)
+        );
+    }
+    @GetMapping("/exchange")
+    public ResponseEntity<List<ExchangeDTO>> getExchangeDetails(
+            @RequestParam String coinId
+    ) {
+        return ResponseEntity.ok(
+                cryptoService.getExchangeDetails(coinId)
         );
     }
 

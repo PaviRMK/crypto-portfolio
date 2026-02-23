@@ -4,22 +4,24 @@
   flex-wrap: wrap;
   align-items: flex-end;
   margin-bottom: 30px;
-  justify-content: flex-start;
 }
 
+/* Each Filter Group */
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-width: 160px;
+  min-width: 180px;
 }
 
+/* Labels */
 .filter-label {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-light);
 }
 
+/* Dropdown */
 .filter-select {
   padding: 12px 16px;
   border-radius: 12px;
@@ -29,8 +31,7 @@
   font-size: 14px;
   cursor: pointer;
   transition: 0.3s;
-   min-width: 180px;
-   width: 100%;
+  width: 100%;
 }
 
 .filter-select:hover {
@@ -41,4 +42,28 @@
   outline: none;
   border-color: #7b2ff7;
   box-shadow: 0 0 0 3px rgba(123,47,247,0.2);
+}
+
+/* Exchange Button */
+.button-group {
+  display: flex;
+  align-items: flex-end;
+}
+
+.exchange-btn {
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(90deg, #7b2ff7, #f107a3);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  height: 44px;
+  white-space: nowrap;
+}
+
+.exchange-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
 }
