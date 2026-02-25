@@ -15,20 +15,23 @@ const ExchangePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch top 5 coins only
+        // 1️⃣ Fetch top 5 coins
         const coinRes = await getTopCoins("usd", 5);
         const topCoins = coinRes.data;
         setCoins(topCoins);
 
-        const exchangeDataObj = {};
+        // 2️⃣ Fetch exchange data for all coins in parallel
+        const exchangePromises = topCoins.map((coin) =>
+          API.get(`/crypto/exchange?coinId=${coin.id}`)
+        );
 
-        // For each coin fetch exchange
-        for (let coin of topCoins) {
-          const res = await API.get(
-            `/crypto/exchange?coinId=${coin.id}`
-          );
-          exchangeDataObj[coin.id] = res.data;
-        }
+        const exchangeResponses = await Promise.all(exchangePromises);
+
+        // 3️⃣ Build exchange map
+        const exchangeDataObj = {};
+        topCoins.forEach((coin, index) => {
+          exchangeDataObj[coin.id] = exchangeResponses[index].data;
+        });
 
         setExchangeMap(exchangeDataObj);
 
@@ -45,6 +48,7 @@ const ExchangePage = () => {
   return (
     <div className="dashboard-wrapper">
 
+      {/* Header */}
       <div className="dashboard-header">
         <h2>Top 5 Coins – Exchange Details</h2>
         <button
@@ -55,6 +59,7 @@ const ExchangePage = () => {
         </button>
       </div>
 
+      {/* Loading */}
       {loading ? (
         <div className="loader">Loading Exchange Details...</div>
       ) : (
@@ -63,7 +68,9 @@ const ExchangePage = () => {
             <h3 style={{ marginBottom: "20px" }}>
               {coin.name}
             </h3>
-            <ExchangeTable exchanges={exchangeMap[coin.id]} />
+
+            {/* 👇 Safe fallback added here */}
+            <ExchangeTable exchanges={exchangeMap[coin.id] || []} />
           </div>
         ))
       )}

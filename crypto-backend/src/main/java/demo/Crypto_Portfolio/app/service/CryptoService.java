@@ -2,15 +2,13 @@ package demo.Crypto_Portfolio.app.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import demo.Crypto_Portfolio.app.model.ExchangeDTO;
 
-
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,8 +22,11 @@ public class CryptoService {
         this.objectMapper = objectMapper;
     }
 
+    // =========================
     // TOP COINS
+    // =========================
 
+    @Cacheable(value = "topCoins", key = "#currency + '-' + #perPage")
     public String getTopCoins(String currency, int perPage) {
 
         String url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -38,8 +39,11 @@ public class CryptoService {
         return restTemplate.getForObject(url, String.class);
     }
 
+    // =========================
     // CHART DATA
+    // =========================
 
+    @Cacheable(value = "chartData", key = "#coinId + '-' + #currency + '-' + #days")
     public List<?> getChartData(String coinId, String currency, int days) {
 
         String url = "https://api.coingecko.com/api/v3/coins/"
@@ -61,7 +65,12 @@ public class CryptoService {
             throw new RuntimeException("Error fetching chart data", e);
         }
     }
+
+    // =========================
     // EXCHANGE & TRADE DETAILS
+    // =========================
+
+    @Cacheable(value = "exchangeData", key = "#coinId")
     public List<ExchangeDTO> getExchangeDetails(String coinId) {
 
         String url = "https://api.coingecko.com/api/v3/coins/"
@@ -71,12 +80,12 @@ public class CryptoService {
             String response = restTemplate.getForObject(url, String.class);
             JsonNode root = objectMapper.readTree(response);
             JsonNode tickers = root.get("tickers");
+
             if (tickers == null || !tickers.isArray()) {
                 return new ArrayList<>();
             }
 
             List<ExchangeDTO> exchangeList = new ArrayList<>();
-
             int limit = Math.min(5, tickers.size()); // Top 5 only
 
             for (int i = 0; i < limit; i++) {
@@ -107,6 +116,4 @@ public class CryptoService {
             throw new RuntimeException("Error fetching exchange data", e);
         }
     }
-
 }
-
