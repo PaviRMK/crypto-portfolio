@@ -26,4 +26,19 @@ export const getChartData = (coinId, currency, days) => {
   });
 };
 
+export const getPortfolioSummary = (userId) =>
+  API.get(`/portfolio/summary?userId=${userId}`);
+
+export const getHoldings = (userId) =>
+  API.get(`/portfolio/holdings?userId=${userId}`);
+
+export const getTrades = (userId) =>
+  API.get(`/portfolio/trades?userId=${userId}`);
+
+export const getRisk = (userId) =>
+  API.get(`/portfolio/risk?userId=${userId}`);
+
+export const createTrade = (userId, data) =>
+  API.post(`/portfolio/trade?userId=${userId}`, data);
+
 export default API;

@@ -17,37 +17,68 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
+  /* =============================
+        FETCH TOP COINS
+  ============================== */
   useEffect(() => {
     const fetchCoins = async () => {
-      setLoading(true);
-      const res = await getTopCoins(currency, perPage);
-      setCoins(res.data);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const res = await getTopCoins(currency, perPage);
+        setCoins(res.data);
+      } catch (error) {
+        console.error("Error fetching coins:", error);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchCoins();
   }, [currency, perPage]);
 
+  /* =============================
+        FETCH CHART DATA
+  ============================== */
   useEffect(() => {
     const fetchChart = async () => {
-      const res = await getChartData(selectedCoin, currency, days);
-      setChartData(res.data);
+      try {
+        const res = await getChartData(selectedCoin, currency, days);
+        setChartData(res.data);
+      } catch (error) {
+        console.error("Error fetching chart:", error);
+      }
     };
+
     fetchChart();
   }, [selectedCoin, currency, days]);
 
   return (
     <div className="dashboard-wrapper">
 
+      {/* HEADER */}
       <div className="dashboard-header">
-        <h2>Crypto Market Dashboard</h2>
-        <button
-          className="exchange-btn"
-          onClick={() => navigate("/exchanges")}
-        >
-          Show Exchanges
-        </button>
+        <h2>Crypto Intelligence Hub</h2>
+
+        <div style={{ display: "flex", gap: "15px" }}>
+          
+          <button
+            className="exchange-toggle-btn"
+            onClick={() => navigate("/exchange")}
+          >
+            Show Exchanges
+          </button>
+
+          <button
+            className="portfolio-btn"
+            onClick={() => navigate("/portfolio")}
+          >
+            Portfolio Tracker
+          </button>
+
+        </div>
       </div>
 
+      {/* FILTER SECTION */}
       <div className="filter-card">
         <FilterBar
           setCurrency={setCurrency}
@@ -56,10 +87,12 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* CHART SECTION */}
       <div className="chart-card">
         <CryptoChart chartData={chartData} />
       </div>
 
+      {/* TABLE SECTION */}
       <div className="table-card">
         {loading ? (
           <div className="loader">Loading...</div>

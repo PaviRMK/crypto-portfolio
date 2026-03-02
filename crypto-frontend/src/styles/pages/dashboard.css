@@ -72,3 +72,18 @@
   font-weight: 500;
   color: var(--text-light);
 }
+.portfolio-btn {
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.portfolio-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}

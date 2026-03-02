@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ExchangePage from "./pages/ExchangePage";
+import PortfolioPage from "./pages/PortfolioPage";
 
 function App() {
   return (
@@ -13,8 +14,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/exchanges" element={<ExchangePage />} />
-
+        <Route path="/exchange" element={<ExchangePage />} />
+        <Route path="/portfolio" element={<PortfolioPage />} />
       </Routes>
     </Router>
   );
