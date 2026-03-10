@@ -7,16 +7,8 @@ const RiskBadge = ({ risk }) => {
   const isHigh = risk.toUpperCase().includes("HIGH");
 
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <span
-        style={{
-          padding: "8px 16px",
-          borderRadius: "20px",
-          fontWeight: "600",
-          background: isHigh ? "#ef4444" : "#22c55e",
-          color: "white"
-        }}
-      >
+    <div className="risk-container">
+      <span className={`badge ${isHigh ? "red" : "green"}`}>
         {risk}
       </span>
     </div>

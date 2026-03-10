@@ -11,7 +11,7 @@ const TradeForm = ({ onTradeSuccess }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleTradeSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!asset.trim()) {
@@ -19,18 +19,8 @@ const TradeForm = ({ onTradeSuccess }) => {
       return;
     }
 
-    if (!quantity || quantity <= 0) {
-      setError("Quantity must be greater than 0");
-      return;
-    }
-
-    if (!price || price <= 0) {
-      setError("Price must be greater than 0");
-      return;
-    }
-
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
       await API.post(`/portfolio/trade?userId=1`, {
@@ -47,12 +37,11 @@ const TradeForm = ({ onTradeSuccess }) => {
       setFee("");
 
       if (onTradeSuccess) {
-        onTradeSuccess();
+        await onTradeSuccess();
       }
 
     } catch (err) {
-      setError("Trade failed. Please try again.");
-      console.error(err);
+      setError("Trade failed.");
     }
 
     setLoading(false);
@@ -62,19 +51,15 @@ const TradeForm = ({ onTradeSuccess }) => {
     <div className="portfolio-section">
       <h3>Add Trade</h3>
 
-      <form className="trade-grid" onSubmit={handleTradeSubmit}>
-
+      <form className="trade-grid" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Asset Symbol (e.g BTC)"
+          placeholder="Asset Symbol (BTC)"
           value={asset}
           onChange={(e) => setAsset(e.target.value)}
         />
 
-        <select
-          value={side}
-          onChange={(e) => setSide(e.target.value)}
-        >
+        <select value={side} onChange={(e) => setSide(e.target.value)}>
           <option value="BUY">BUY</option>
           <option value="SELL">SELL</option>
         </select>
@@ -100,21 +85,12 @@ const TradeForm = ({ onTradeSuccess }) => {
           onChange={(e) => setFee(e.target.value)}
         />
 
-        <button
-          type="submit"
-          className="trade-btn"
-          disabled={loading}
-        >
+        <button type="submit" className="trade-btn" disabled={loading}>
           {loading ? "Processing..." : "Submit Trade"}
         </button>
-
       </form>
 
-      {error && (
-        <p style={{ color: "#ef4444", marginTop: "12px" }}>
-          {error}
-        </p>
-      )}
+      {error && <p className="error-text">{error}</p>}
     </div>
   );
 };

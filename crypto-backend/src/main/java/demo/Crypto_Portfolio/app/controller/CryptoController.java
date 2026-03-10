@@ -1,19 +1,33 @@
 package demo.Crypto_Portfolio.app.controller;
 
 import demo.Crypto_Portfolio.app.service.CryptoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
 import demo.Crypto_Portfolio.app.model.ExchangeDTO;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/crypto")
 @CrossOrigin(origins = "http://localhost:3000")
 public class CryptoController {
 
-    @Autowired
-    private CryptoService cryptoService;
+    private final CryptoService cryptoService;
+
+    public CryptoController(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
+
+    @GetMapping("/top-coins")
+    public ResponseEntity<?> getTopCoins(
+            @RequestParam String currency,
+            @RequestParam int perPage
+    ) {
+        return ResponseEntity.ok(
+                cryptoService.getTopCoins(currency, perPage)
+        );
+    }
 
     @GetMapping("/chart")
     public ResponseEntity<?> getChartData(
@@ -25,15 +39,7 @@ public class CryptoController {
                 cryptoService.getChartData(coinId, currency, days)
         );
     }
-    @GetMapping("/top-coins")
-    public ResponseEntity<?> getTopCoins(
-            @RequestParam String currency,
-            @RequestParam int perPage
-    ) {
-        return ResponseEntity.ok(
-                cryptoService.getTopCoins(currency, perPage)
-        );
-    }
+
     @GetMapping("/exchange")
     public ResponseEntity<List<ExchangeDTO>> getExchangeDetails(
             @RequestParam String coinId
@@ -42,5 +48,10 @@ public class CryptoController {
                 cryptoService.getExchangeDetails(coinId)
         );
     }
-
 }
+
+
+
+
+
+

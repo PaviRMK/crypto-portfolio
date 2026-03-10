@@ -18,7 +18,8 @@ public class CacheConfig {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
                 "topCoins",
                 "chartData",
-                "exchangeData"
+                "exchangeData",
+                "livePrices"
         );
 
         cacheManager.setCaffeine(

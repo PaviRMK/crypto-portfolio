@@ -6,7 +6,7 @@ const HoldingsTable = ({ holdings }) => {
     return (
       <div className="portfolio-section">
         <h3>Holdings</h3>
-        <p style={{ color: "#94a3b8" }}>No holdings available.</p>
+        <p className="empty-text">No holdings available.</p>
       </div>
     );
   }
@@ -21,22 +21,37 @@ const HoldingsTable = ({ holdings }) => {
             <th>Asset</th>
             <th>Quantity</th>
             <th>Avg Cost</th>
+            <th>Live Price</th>
+            <th>Current Value</th>
+            <th>Unrealized PnL</th>
           </tr>
         </thead>
 
         <tbody>
-          {holdings.map((item, index) => (
+          {holdings.map((holding, index) => (
             <tr key={index}>
-              <td style={{ fontWeight: 600 }}>
-                {item.assetSymbol}
+              <td className="asset-cell">
+                {holding.assetSymbol}
               </td>
 
               <td>
-                {Number(item.quantity).toLocaleString()}
+                {Number(holding.quantity).toLocaleString()}
               </td>
 
               <td>
-                ${Number(item.avgCost).toLocaleString()}
+                ${Number(holding.avgCost).toLocaleString()}
+              </td>
+
+              <td>
+                ${Number(holding.livePrice).toLocaleString()}
+              </td>
+
+              <td>
+                ${Number(holding.currentValue).toLocaleString()}
+              </td>
+
+              <td className={holding.unrealizedPnl >= 0 ? "green" : "red"}>
+                ${Number(holding.unrealizedPnl).toLocaleString()}
               </td>
             </tr>
           ))}

@@ -1,14 +1,21 @@
 .dashboard-wrapper {
   min-height: 100vh;
   background: var(--dark-bg);
-  padding: 50px 80px;
+  padding: 30px 80px;
 }
 
-/* Header */
+/* Header / Navbar */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 18px 24px;
+  background: rgba(27, 37, 60, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
   margin-bottom: 40px;
 }
 
@@ -65,13 +72,7 @@
   opacity: 0.9;
 }
 
-/* Loader */
-.loader {
-  text-align: center;
-  padding: 20px;
-  font-weight: 500;
-  color: var(--text-light);
-}
+/* Portfolio Button */
 .portfolio-btn {
   padding: 12px 22px;
   border-radius: 10px;
@@ -86,4 +87,25 @@
 .portfolio-btn:hover {
   transform: translateY(-2px);
   opacity: 0.9;
+}
+
+/* Loader */
+.loader {
+  text-align: center;
+  padding: 20px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .dashboard-wrapper {
+    padding: 24px;
+  }
+
+  .dashboard-header {
+    padding: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 }

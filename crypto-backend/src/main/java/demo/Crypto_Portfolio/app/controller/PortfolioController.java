@@ -3,9 +3,11 @@ package demo.Crypto_Portfolio.app.controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
+
 import demo.Crypto_Portfolio.app.service.PortfolioService;
 import demo.Crypto_Portfolio.app.model.*;
 import demo.Crypto_Portfolio.app.dto.PortfolioSummaryDTO;
+import demo.Crypto_Portfolio.app.dto.HoldingLiveDTO;
 
 @RestController
 @RequestMapping("/api/portfolio")
@@ -28,6 +30,16 @@ public class PortfolioController {
         );
     }
 
+    // 🔥 NEW LIVE HOLDINGS API
+    @GetMapping("/holdings-live")
+    public ResponseEntity<List<HoldingLiveDTO>> getHoldingsLive(
+            @RequestParam Long userId) {
+
+        return ResponseEntity.ok(
+                portfolioService.getHoldingsWithLive(userId)
+        );
+    }
+
     @GetMapping("/holdings")
     public ResponseEntity<List<Holding>> getHoldings(
             @RequestParam Long userId) {
@@ -45,6 +57,7 @@ public class PortfolioController {
                 portfolioService.getTrades(userId)
         );
     }
+
     @GetMapping("/summary")
     public ResponseEntity<PortfolioSummaryDTO> getSummary(
             @RequestParam Long userId) {

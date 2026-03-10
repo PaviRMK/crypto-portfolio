@@ -19,105 +19,46 @@ const PortfolioPage = () => {
   const [risk, setRisk] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* =========================
-     SYMBOL → COINGECKO ID MAP
-  ========================= */
+  /* ================= FETCH FUNCTIONS ================= */
 
-  const symbolToId = {
-    BTC: "bitcoin",
-    ETH: "ethereum",
-    XRP: "ripple",
-    USDT: "tether"
+  const fetchSummary = async () => {
+    const res = await API.get(
+      `/portfolio/summary?userId=${userId}`
+    );
+    setSummary(res.data);
   };
-
-  /* =========================
-     FETCH HOLDINGS + CALCULATE SUMMARY
-  ========================= */
 
   const fetchHoldings = async () => {
-    const res = await API.get(`/portfolio/holdings?userId=${userId}`);
-    const holdingsData = res.data;
-
-    setHoldings(holdingsData);
-
-    await calculatePortfolioSummary(holdingsData);
-  };
-
-  const calculatePortfolioSummary = async (holdingsData) => {
-
-    if (!holdingsData || holdingsData.length === 0) {
-      setSummary({
-        totalInvestment: 0,
-        currentValue: 0,
-        totalPnl: 0
-      });
-      return;
-    }
-
-    let totalInvestment = 0;
-    let currentValue = 0;
-
-    const coinIds = holdingsData
-      .map(h => symbolToId[h.assetSymbol])
-      .filter(Boolean)
-      .join(",");
-
-    if (!coinIds) return;
-
-    const priceRes = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${coinIds}&vs_currencies=usd`
+    const res = await API.get(
+      `/portfolio/holdings-live?userId=${userId}`
     );
-
-    const prices = await priceRes.json();
-
-    holdingsData.forEach(h => {
-
-      const coinId = symbolToId[h.assetSymbol];
-      const livePrice = prices[coinId]?.usd || 0;
-
-      const investment = h.quantity * h.avgCost;
-      const value = h.quantity * livePrice;
-
-      totalInvestment += investment;
-      currentValue += value;
-    });
-
-    const totalPnl = currentValue - totalInvestment;
-
-    setSummary({
-      totalInvestment,
-      currentValue,
-      totalPnl
-    });
+    setHoldings(res.data);
   };
-
-  /* =========================
-     OTHER FETCH FUNCTIONS
-  ========================= */
 
   const fetchTrades = async () => {
-    const res = await API.get(`/portfolio/trades?userId=${userId}`);
+    const res = await API.get(
+      `/portfolio/trades?userId=${userId}`
+    );
     setTrades(res.data);
   };
 
   const fetchRisk = async () => {
-    const res = await API.get(`/portfolio/risk?userId=${userId}`);
+    const res = await API.get(
+      `/portfolio/risk?userId=${userId}`
+    );
     setRisk(res.data);
   };
 
-  /* =========================
-     REFRESH ALL DATA
-  ========================= */
+  /* ================= REFRESH ALL ================= */
 
   const refreshAllData = useCallback(async () => {
-    await fetchHoldings();   // 🔥 recalculates summary
+    await fetchSummary();
+    await fetchHoldings();
     await fetchTrades();
     await fetchRisk();
   }, []);
 
-  /* =========================
-     INITIAL LOAD
-  ========================= */
+  /* ================= INITIAL LOAD ================= */
 
   useEffect(() => {
     const loadData = async () => {

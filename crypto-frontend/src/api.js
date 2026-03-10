@@ -30,7 +30,7 @@ export const getPortfolioSummary = (userId) =>
   API.get(`/portfolio/summary?userId=${userId}`);
 
 export const getHoldings = (userId) =>
-  API.get(`/portfolio/holdings?userId=${userId}`);
+  API.get(`/portfolio/holdings-live?userId=${userId}`);
 
 export const getTrades = (userId) =>
   API.get(`/portfolio/trades?userId=${userId}`);

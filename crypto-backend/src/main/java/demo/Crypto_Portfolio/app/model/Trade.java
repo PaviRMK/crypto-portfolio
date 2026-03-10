@@ -50,4 +50,14 @@ public class Trade {
 
     public LocalDateTime getExecutedAt() { return executedAt; }
     public void setExecutedAt(LocalDateTime executedAt) { this.executedAt = executedAt; }
+    @Column(name = "coin_id")
+    private String coinId;
+
+    public String getCoinId() {
+        return coinId;
+    }
+
+    public void setCoinId(String coinId) {
+        this.coinId = coinId;
+    }
 }

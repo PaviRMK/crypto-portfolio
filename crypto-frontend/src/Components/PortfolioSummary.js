@@ -9,18 +9,18 @@ const PortfolioSummary = ({ summary }) => {
 
       <div className="summary-card">
         <h4>Total Investment</h4>
-        <p>${summary.totalInvestment?.toLocaleString()}</p>
+        <p>${Number(summary.totalInvestment).toLocaleString()}</p>
       </div>
 
       <div className="summary-card">
         <h4>Current Value</h4>
-        <p>${summary.currentValue?.toLocaleString()}</p>
+        <p>${Number(summary.currentValue).toLocaleString()}</p>
       </div>
 
       <div className="summary-card">
         <h4>Total PnL</h4>
         <p className={summary.totalPnl > 0 ? "green" : "red"}>
-          ${summary.totalPnl?.toLocaleString()}
+          ${Number(summary.totalPnl).toLocaleString()}
         </p>
       </div>
 
