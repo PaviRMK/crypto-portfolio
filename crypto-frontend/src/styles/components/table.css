@@ -1,3 +1,5 @@
+/* ================= CRYPTO TABLE ================= */
+
 .crypto-table {
   width: 100%;
   border-collapse: collapse;
@@ -18,10 +20,12 @@
   border-bottom: 1px solid #1e293b;
 }
 
-.crypto-table tr:hover {
+.crypto-table tbody tr:hover {
   background: #1e293b;
   transition: 0.3s;
 }
+
+/* price colors */
 
 .green {
   color: var(--success);
@@ -32,6 +36,8 @@
   color: var(--danger);
   font-weight: 600;
 }
+
+/* ================= GLOBAL PAGINATION ================= */
 
 .pagination {
   display: flex;
@@ -70,6 +76,39 @@
 }
 
 .active-page {
-  background: #2563eb;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
   color: white;
+}
+
+.coin-risk-panel {
+  flex: 1;
+  background: #1e293b;
+  padding: 18px;
+  border-radius: 10px;
+  min-width: 260px;
+}
+.risk-badge {
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.risk-badge.low {
+  background: #16a34a;
+}
+
+.risk-badge.medium {
+  background: #facc15;
+  color: black;
+}
+
+.risk-badge.high {
+  background: #dc2626;
+}
+
+.risk-reason {
+  margin-top: 6px;
+  color: #cbd5e1;
 }

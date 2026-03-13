@@ -1,10 +1,11 @@
 package demo.Crypto_Portfolio.app.controller;
 
 import demo.Crypto_Portfolio.app.service.CryptoService;
-import demo.Crypto_Portfolio.app.model.ExchangeDTO;
+import demo.Crypto_Portfolio.app.service.PriceSnapshotService;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+
 
 import java.util.List;
 
@@ -14,9 +15,12 @@ import java.util.List;
 public class CryptoController {
 
     private final CryptoService cryptoService;
+    private final PriceSnapshotService priceSnapshotService;
 
-    public CryptoController(CryptoService cryptoService) {
+    public CryptoController(CryptoService cryptoService,
+                            PriceSnapshotService priceSnapshotService) {
         this.cryptoService = cryptoService;
+        this.priceSnapshotService = priceSnapshotService;
     }
 
     @GetMapping("/top-coins")
@@ -40,12 +44,12 @@ public class CryptoController {
         );
     }
 
-    @GetMapping("/exchange")
-    public ResponseEntity<List<ExchangeDTO>> getExchangeDetails(
-            @RequestParam String coinId
-    ) {
+    @GetMapping("/history")
+    public ResponseEntity<?> getPriceHistory(
+            @RequestParam String coin) {
+
         return ResponseEntity.ok(
-                cryptoService.getExchangeDetails(coinId)
+                priceSnapshotService.getHistory(coin)
         );
     }
 }

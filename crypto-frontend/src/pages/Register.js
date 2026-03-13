@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import cryptoImage from "../assets/crypto.png";
-import API from "../api";
 import "../styles/pages/register.css";
+import { registerUser } from "../services/authApi";
 
 
 
@@ -23,83 +23,83 @@ function Register() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (formData.password !== formData.confirmPassword) {
-    alert("Passwords do not match");
-    return;
-  }
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
 
-  try {
-    const response = await API.post("/auth/register", {
-      username: formData.username,
-      email: formData.email,
-      password: formData.password
-    });
+    try {
+      const response = await registerUser({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
 
-    alert(response.data);
+      alert(response.data);
 
-  } catch (error) {
-    alert("Registration Failed");
-  }
-};
+    } catch (error) {
+      alert("Registration Failed");
+    }
+  };
 
 
   return (
     <div className="auth-page">
-    <div className="auth-wrapper">
+      <div className="auth-wrapper">
 
-      <div className="register-left">
-        <h1>Create Account</h1>
-        <p>Start managing your Crypto Portfolio</p>
+        <div className="register-left">
+          <h1>Create Account</h1>
+          <p>Start managing your Crypto Portfolio</p>
 
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
 
-          <input
-            type="text"
-            name="username"
-            placeholder="Enter Username"
-            onChange={handleChange}
-            required
-          />
+            <input
+              type="text"
+              name="username"
+              placeholder="Enter Username"
+              onChange={handleChange}
+              required
+            />
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter Email"
-            onChange={handleChange}
-            required
-          />
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter Email"
+              onChange={handleChange}
+              required
+            />
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter Password"
-            onChange={handleChange}
-            required
-          />
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter Password"
+              onChange={handleChange}
+              required
+            />
 
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            onChange={handleChange}
-            required
-          />
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              onChange={handleChange}
+              required
+            />
 
-          <button type="submit">Register</button>
-        </form>
+            <button type="submit">Register</button>
+          </form>
 
-        <p className="switch">
-          Already have an account? <Link to="/login">Login</Link>
-        </p>
+          <p className="switch">
+            Already have an account? <Link to="/login">Login</Link>
+          </p>
+        </div>
+
+        <div className="register-right">
+          <img src={cryptoImage} alt="Crypto Illustration" />
+        </div>
+
       </div>
-
-      <div className="register-right">
-        <img src={cryptoImage} alt="Crypto Illustration" />
-      </div>
-
-    </div>
     </div>
   );
 }

@@ -1,103 +1,34 @@
 package demo.Crypto_Portfolio.app.service;
 
-import demo.Crypto_Portfolio.app.dto.HoldingLiveDTO;
-import org.springframework.stereotype.Service;
+import demo.Crypto_Portfolio.app.dto.portfolio.HoldingLiveDTO;
+import demo.Crypto_Portfolio.app.dto.portfolio.PortfolioSummaryDTO;
+import demo.Crypto_Portfolio.app.dto.portfolio.RiskAlertDTO;
+import demo.Crypto_Portfolio.app.model.Holding;
+import demo.Crypto_Portfolio.app.model.Trade;
+import demo.Crypto_Portfolio.app.repository.HoldingRepository;
+import demo.Crypto_Portfolio.app.repository.TradeRepository;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import org.springframework.stereotype.Service;
 
-import demo.Crypto_Portfolio.app.model.*;
-import demo.Crypto_Portfolio.app.repository.*;
-import demo.Crypto_Portfolio.app.dto.PortfolioSummaryDTO;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PortfolioService {
 
-    private final TradeRepository tradeRepository;
     private final HoldingRepository holdingRepository;
     private final CryptoService cryptoService;
+    private final TradeRepository tradeRepository;
 
-    public PortfolioService(TradeRepository tradeRepository,
-                            HoldingRepository holdingRepository,
-                            CryptoService cryptoService) {
+    public PortfolioService(HoldingRepository holdingRepository,
+                            CryptoService cryptoService,
+                            TradeRepository tradeRepository) {
 
-        this.tradeRepository = tradeRepository;
         this.holdingRepository = holdingRepository;
         this.cryptoService = cryptoService;
-    }
-
-    // =============================
-    // ADD TRADE
-    // =============================
-
-    public Trade addTrade(Long userId, Trade trade) {
-
-        trade.setUserId(userId);
-        trade.setExecutedAt(LocalDateTime.now());
-
-        updateHolding(userId, trade);
-
-        return tradeRepository.save(trade);
-    }
-
-    // =============================
-    // UPDATE HOLDING
-    // =============================
-
-    private void updateHolding(Long userId, Trade trade) {
-
-        Holding holding = holdingRepository
-                .findByUserIdAndAssetSymbol(userId, trade.getAssetSymbol())
-                .orElse(new Holding());
-
-        holding.setUserId(userId);
-        holding.setAssetSymbol(trade.getAssetSymbol());
-        holding.setCoinId(convertSymbolToId(trade.getAssetSymbol()));
-        double currentQty = holding.getQuantity();
-        double currentAvg = holding.getAvgCost();
-
-        if ("BUY".equalsIgnoreCase(trade.getSide())) {
-
-            double totalInvestment =
-                    (currentQty * currentAvg)
-                            + (trade.getQuantity() * trade.getPrice())
-                            + trade.getFee();
-
-            double newQty = currentQty + trade.getQuantity();
-            double newAvg = totalInvestment / newQty;
-
-            holding.setQuantity(newQty);
-            holding.setAvgCost(newAvg);
-
-        }
-
-        else if ("SELL".equalsIgnoreCase(trade.getSide())) {
-
-            double sellQty = trade.getQuantity();
-
-            double realized =
-                    (trade.getPrice() - currentAvg) * sellQty
-                            - trade.getFee();
-
-            trade.setRealizedPnl(realized);
-
-            double newQty = currentQty - sellQty;
-
-            if (newQty <= 0) {
-
-                holdingRepository.delete(holding);
-                return;
-
-            } else {
-
-                holding.setQuantity(newQty);
-            }
-        }
-
-        holding.setUpdatedAt(LocalDateTime.now());
-
-        holdingRepository.save(holding);
+        this.tradeRepository = tradeRepository;
     }
 
     // =============================
@@ -105,17 +36,7 @@ public class PortfolioService {
     // =============================
 
     public List<Holding> getHoldings(Long userId) {
-
         return holdingRepository.findByUserId(userId);
-    }
-
-    // =============================
-    // TRADES
-    // =============================
-
-    public List<Trade> getTrades(Long userId) {
-
-        return tradeRepository.findByUserId(userId);
     }
 
     // =============================
@@ -126,7 +47,6 @@ public class PortfolioService {
 
         List<Holding> holdings = holdingRepository.findByUserId(userId);
 
-        // collect all coin ids
         String coinIds = holdings.stream()
                 .map(h -> convertSymbolToId(h.getAssetSymbol()))
                 .distinct()
@@ -141,22 +61,17 @@ public class PortfolioService {
 
             double livePrice = 0;
 
-            if (prices != null
-                    && prices.has(coinId)
-                    && prices.get(coinId) != null
-                    && prices.get(coinId).has("usd")) {
+            if (prices != null &&
+                    prices.has(coinId) &&
+                    prices.get(coinId).has("usd")) {
 
                 livePrice = prices.get(coinId).get("usd").asDouble();
-
-            } else {
-
-                livePrice = 0; // fallback when API limit reached
             }
 
             double quantity = h.getQuantity();
             double currentValue = quantity * livePrice;
             double invested = quantity * h.getAvgCost();
-            double unrealizedPnl = quantity == 0 ? 0 : currentValue - invested;
+            double pnl = currentValue - invested;
 
             return new HoldingLiveDTO(
                     h.getAssetSymbol(),
@@ -164,14 +79,14 @@ public class PortfolioService {
                     h.getAvgCost(),
                     livePrice,
                     currentValue,
-                    unrealizedPnl
+                    pnl
             );
 
         }).toList();
     }
 
     // =============================
-    // SUMMARY
+    // PORTFOLIO SUMMARY
     // =============================
 
     public PortfolioSummaryDTO getPortfolioSummary(Long userId) {
@@ -179,7 +94,7 @@ public class PortfolioService {
         List<Holding> holdings = holdingRepository.findByUserId(userId);
 
         double totalInvestment = 0;
-        double currentValue = 0;
+        double totalValue = 0;
 
         String coinIds = holdings.stream()
                 .map(h -> convertSymbolToId(h.getAssetSymbol()))
@@ -191,31 +106,103 @@ public class PortfolioService {
 
         for (Holding h : holdings) {
 
-            double invested = h.getQuantity() * h.getAvgCost();
-            totalInvestment += invested;
+            double investment = h.getQuantity() * h.getAvgCost();
+            totalInvestment += investment;
 
             String coinId = convertSymbolToId(h.getAssetSymbol());
 
             double livePrice = 0;
 
-            if (prices.has(coinId) && prices.get(coinId).has("usd")) {
+            if (prices != null &&
+                    prices.has(coinId) &&
+                    prices.get(coinId).has("usd")) {
+
                 livePrice = prices.get(coinId).get("usd").asDouble();
             }
 
-            currentValue += h.getQuantity() * livePrice;
+            totalValue += h.getQuantity() * livePrice;
         }
 
         PortfolioSummaryDTO dto = new PortfolioSummaryDTO();
 
         dto.setTotalInvestment(totalInvestment);
-        dto.setCurrentValue(currentValue);
-        dto.setTotalPnl(currentValue - totalInvestment);
+        dto.setTotalValue(totalValue);
+        dto.setTotalPnl(totalValue - totalInvestment);
 
         return dto;
     }
 
     // =============================
-    // RISK
+    // TRADES
+    // =============================
+
+    public List<Trade> getTrades(Long userId) {
+        return tradeRepository.findByUserId(userId);
+    }
+
+    // =============================
+    // SAVE TRADE
+    // =============================
+
+    public Trade saveTrade(Long userId, Trade trade) {
+
+        trade.setUserId(userId);
+
+        Trade savedTrade = tradeRepository.save(trade);
+
+        updateHoldingFromTrade(savedTrade);
+
+        return savedTrade;
+    }
+
+    // =============================
+    // UPDATE HOLDING FROM TRADE
+    // =============================
+
+    private void updateHoldingFromTrade(Trade trade) {
+
+        String symbol = trade.getSymbol();
+
+        Holding holding = holdingRepository
+                .findByUserIdAndAssetSymbol(trade.getUserId(), symbol)
+                .orElse(new Holding());
+
+        holding.setUserId(trade.getUserId());
+        holding.setAssetSymbol(symbol);
+
+        double currentQty = holding.getQuantity();
+
+        if ("BUY".equalsIgnoreCase(trade.getSide())) {
+
+            double newQty = currentQty + trade.getQuantity();
+
+            // average cost calculation
+            double currentInvestment = currentQty * holding.getAvgCost();
+            double newInvestment = trade.getQuantity() * trade.getPrice();
+
+            double avgCost = (currentInvestment + newInvestment) / newQty;
+
+            holding.setQuantity(newQty);
+            holding.setAvgCost(avgCost);
+
+        } else if ("SELL".equalsIgnoreCase(trade.getSide())) {
+
+            double newQty = currentQty - trade.getQuantity();
+
+            if (newQty <= 0) {
+
+                holdingRepository.delete(holding);
+                return;
+            }
+
+            holding.setQuantity(newQty);
+        }
+
+        holdingRepository.save(holding);
+    }
+
+    // =============================
+    // RISK LEVEL
     // =============================
 
     public String calculateRiskLevel(Long userId) {
@@ -231,7 +218,6 @@ public class PortfolioService {
         for (Holding h : holdings) {
 
             double value = h.getQuantity() * h.getAvgCost();
-
             double exposure = value / total;
 
             if (exposure > 0.7) {
@@ -244,6 +230,10 @@ public class PortfolioService {
     }
 
     // =============================
+    // RISK ALERTS
+    // =============================
+
+    // =============================
     // SYMBOL → COINGECKO ID
     // =============================
 
@@ -254,6 +244,8 @@ public class PortfolioService {
             case "BTC": return "bitcoin";
             case "ETH": return "ethereum";
             case "SOL": return "solana";
+            case "BNB": return "binancecoin";
+            case "USDT": return "tether";
             case "XRP": return "ripple";
             case "ADA": return "cardano";
             case "DOGE": return "dogecoin";
@@ -264,5 +256,34 @@ public class PortfolioService {
 
             default: return symbol.toLowerCase();
         }
+    }
+    public List<RiskAlertDTO> getRiskAlerts(Long userId) {
+
+        List<Holding> holdings = holdingRepository.findByUserId(userId);
+        List<RiskAlertDTO> alerts = new ArrayList<>();
+
+        double totalValue = holdings.stream()
+                .mapToDouble(h -> h.getQuantity() * h.getAvgCost())
+                .sum();
+
+        for (Holding h : holdings) {
+
+            double value = h.getQuantity() * h.getAvgCost();
+
+            if (totalValue == 0) continue;
+
+            double exposure = value / totalValue;
+
+            if (exposure > 0.7) {
+
+                alerts.add(new RiskAlertDTO(
+                        h.getAssetSymbol(),
+                        "Portfolio heavily concentrated in " + h.getAssetSymbol(),
+                        "HIGH"
+                ));
+            }
+        }
+
+        return alerts;
     }
 }

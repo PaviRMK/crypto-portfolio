@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getTopCoins, getChartData } from "../api";
-import { useNavigate } from "react-router-dom";
+import { getTopCoins, getChartData } from "../services/cryptoApi";
 import FilterBar from "../Components/FilterBar";
 import CryptoTable from "../Components/CryptoTable";
 import CryptoChart from "../Components/CryptoChart";
@@ -15,7 +14,6 @@ const Dashboard = () => {
   const [days, setDays] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
 
   /* =============================
         FETCH TOP COINS
@@ -25,7 +23,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const res = await getTopCoins(currency, perPage);
-        setCoins(res.data);
+        setCoins(res);
       } catch (error) {
         console.error("Error fetching coins:", error);
       } finally {
@@ -43,7 +41,7 @@ const Dashboard = () => {
     const fetchChart = async () => {
       try {
         const res = await getChartData(selectedCoin, currency, days);
-        setChartData(res.data);
+        setChartData(res);
       } catch (error) {
         console.error("Error fetching chart:", error);
       }
@@ -54,29 +52,6 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-wrapper">
-
-      {/* HEADER */}
-      <div className="dashboard-header">
-        <h2>Crypto Intelligence Hub</h2>
-
-        <div style={{ display: "flex", gap: "15px" }}>
-          
-          <button
-            className="exchange-toggle-btn"
-            onClick={() => navigate("/exchange")}
-          >
-            Show Exchanges
-          </button>
-
-          <button
-            className="portfolio-btn"
-            onClick={() => navigate("/portfolio")}
-          >
-            Portfolio Tracker
-          </button>
-
-        </div>
-      </div>
 
       {/* FILTER SECTION */}
       <div className="filter-card">

@@ -1,0 +1,171 @@
+/* PAGE */
+
+.exchange-page{
+  padding:40px;
+  max-width:1200px;
+  margin:0 auto;
+}
+
+/* GRID */
+
+.exchange-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  margin-top:30px;
+}
+
+/* CARDS */
+
+.connect-card,
+.connected-card{
+  background:#1e293b;
+  padding:30px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* CARD TITLES */
+
+.connect-card h2,
+.connected-card h2{
+  color:#e2e8f0;
+  margin-bottom:20px;
+}
+
+/* INPUTS */
+
+.connect-card input,
+.connect-card select{
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border-radius:8px;
+  border:1px solid #334155;
+  background:#0f172a;
+  color:#e2e8f0;
+  font-size:14px;
+}
+
+.connect-card input::placeholder{
+  color:#94a3b8;
+}
+
+.connect-card input:focus,
+.connect-card select:focus{
+  outline:none;
+  border-color:#4CAF50;
+}
+
+/* CONNECT BUTTON */
+
+.connect-card button{
+  width:100%;
+  padding:12px;
+  background:#22c55e;
+  border:none;
+  border-radius:8px;
+  color:white;
+  font-weight:500;
+  cursor:pointer;
+}
+
+.connect-card button:hover{
+  background:#16a34a;
+}
+
+/* EXCHANGE BOX */
+
+.exchange-box{
+  margin-top:15px;
+  padding:18px;
+  border-radius:10px;
+  background:#0f172a;
+  border:1px solid #334155;
+}
+
+/* HEADER */
+
+.exchange-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+/* EXCHANGE NAME */
+
+.exchange-name{
+  font-weight:600;
+  color:#e2e8f0;
+}
+
+/* STATUS */
+
+.status{
+  color:#22c55e;
+  font-weight:600;
+}
+
+/* ACTIONS */
+
+.exchange-actions{
+  display:flex;
+  gap:12px;
+}
+
+/* SYNC BUTTON */
+
+.sync-btn{
+  background:#16a34a;
+  color:white;
+  padding:8px 14px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.sync-btn:hover{
+  background:#15803d;
+}
+
+/* DISCONNECT */
+
+.disconnect-btn{
+  background:#ef4444;
+  color:white;
+  padding:8px 14px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.disconnect-btn:hover{
+  background:#dc2626;
+}
+
+/* LAST SYNC */
+
+.sync-time{
+  margin-top:10px;
+  font-size:12px;
+  color:#94a3b8;
+}
+
+/* EMPTY */
+
+.empty-text{
+  color:#94a3b8;
+  text-align:center;
+  margin-top:40px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+  .exchange-grid{
+    grid-template-columns:1fr;
+  }
+
+}

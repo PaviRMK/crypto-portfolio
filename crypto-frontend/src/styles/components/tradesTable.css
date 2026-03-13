@@ -1,0 +1,97 @@
+/* ================= TRADE TABLE ================= */
+
+.trades-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.trades-table th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid rgba(148,163,184,0.2);
+}
+
+.trades-table td {
+  padding: 12px;
+}
+
+.trades-table tr:nth-child(even) {
+  background: rgba(148,163,184,0.05);
+}
+
+.trades-table tbody tr:hover {
+  background: rgba(59,130,246,0.08);
+  transition: 0.2s;
+}
+
+/* BUY / SELL */
+
+.buy-text {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.sell-text {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* ================= TRADE PAGE PAGINATION ================= */
+
+.table-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 10px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-btn {
+  padding: 5px 12px;
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.page-btn:hover {
+  background-color: #1e293b;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-number {
+  padding: 5px 10px;
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.page-number:hover {
+  background-color: #1e293b;
+}
+
+.active-page {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}

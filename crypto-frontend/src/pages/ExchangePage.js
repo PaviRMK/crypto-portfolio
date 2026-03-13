@@ -1,79 +1,96 @@
-import React, { useEffect, useState } from "react";
-import { getTopCoins } from "../api";
-import API from "../api";
-import ExchangeTable from "../Components/ExchangeTable";
+import React, { useState } from "react";
+import ConnectExchangeForm from "../Components/ConnectExchangeForm";
+import SyncPortfolioButton from "../Components/SyncPortfolioButton";
 import { useNavigate } from "react-router-dom";
-import "../styles/pages/dashboard.css";
+import "../styles/pages/exchangePage.css";
+
 
 const ExchangePage = () => {
-  const [coins, setCoins] = useState([]);
-  const [exchangeMap, setExchangeMap] = useState({});
-  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // 1️⃣ Fetch top 5 coins
-        const coinRes = await getTopCoins("usd", 5);
-        const topCoins = coinRes.data;
-        setCoins(topCoins);
+  const [connected, setConnected] = useState(false);
 
-        // 2️⃣ Fetch exchange data for all coins in parallel
-        const exchangePromises = topCoins.map((coin) =>
-          API.get(`/crypto/exchange?coinId=${coin.id}`)
-        );
+  /* ================= AFTER CONNECT ================= */
 
-        const exchangeResponses = await Promise.all(exchangePromises);
+  const handleConnected = () => {
+    setConnected(true);
+  };
 
-        // 3️⃣ Build exchange map
-        const exchangeDataObj = {};
-        topCoins.forEach((coin, index) => {
-          exchangeDataObj[coin.id] = exchangeResponses[index].data;
-        });
+  /* ================= AFTER SYNC ================= */
 
-        setExchangeMap(exchangeDataObj);
+  const handleSynced = () => {
 
-      } catch (error) {
-        console.error("Exchange Page Error:", error);
-      }
+    console.log("Portfolio synced successfully");
 
-      setLoading(false);
-    };
+    // redirect to portfolio page
+    navigate("/portfolio");
 
-    fetchData();
-  }, []);
+  };
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="exchange-page">
 
-      {/* Header */}
-      <div className="dashboard-header">
-        <h2>Top 5 Coins – Exchange Details</h2>
-        <button
-          className="logout-btn"
-          onClick={() => navigate("/dashboard")}
-        >
-          Back
-        </button>
+      <h1>Exchange Integration</h1>
+
+      <div className="exchange-grid">
+
+        {/* Connect Exchange Card */}
+
+        <ConnectExchangeForm onConnected={handleConnected} />
+
+        {/* Connected Exchanges Card */}
+
+        <div className="connected-card">
+
+          <h2>Connected Exchanges</h2>
+
+          {connected ? (
+
+            <div className="exchange-box">
+
+              <div className="exchange-header">
+
+                <span className="exchange-name">
+                  🟡 Binance
+                </span>
+
+                <span className="status">
+                  Connected
+                </span>
+
+              </div>
+
+              <div className="exchange-actions">
+
+                <SyncPortfolioButton
+                  exchangeId={1}
+                  onSynced={handleSynced}
+                />
+
+                <button className="disconnect-btn">
+                  Disconnect
+                </button>
+
+              </div>
+
+              <p className="sync-time">
+                Last Sync: Just now
+              </p>
+
+            </div>
+
+          ) : (
+
+            <p className="empty-text">
+              No exchange connected yet
+            </p>
+
+          )}
+
+        </div>
+
       </div>
-
-      {/* Loading */}
-      {loading ? (
-        <div className="loader">Loading Exchange Details...</div>
-      ) : (
-        coins.map((coin) => (
-          <div key={coin.id} className="table-card">
-            <h3 style={{ marginBottom: "20px" }}>
-              {coin.name}
-            </h3>
-
-            {/* 👇 Safe fallback added here */}
-            <ExchangeTable exchanges={exchangeMap[coin.id] || []} />
-          </div>
-        ))
-      )}
 
     </div>
   );

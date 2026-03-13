@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import demo.Crypto_Portfolio.app.model.ExchangeDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,58 +73,6 @@ public class CryptoService {
         }
     }
 
-    // =========================
-    // EXCHANGE DATA
-    // =========================
-
-    @Cacheable(value = "exchangeData", key = "#coinId")
-    public List<ExchangeDTO> getExchangeDetails(String coinId) {
-
-        String url = "https://api.coingecko.com/api/v3/coins/"
-                + coinId + "/tickers";
-
-        try {
-
-            String response = restTemplate.getForObject(url, String.class);
-
-            JsonNode root = objectMapper.readTree(response);
-
-            JsonNode tickers = root.get("tickers");
-
-            List<ExchangeDTO> exchangeList = new ArrayList<>();
-
-            if (tickers != null && tickers.isArray()) {
-
-                int limit = Math.min(5, tickers.size());
-
-                for (int i = 0; i < limit; i++) {
-
-                    JsonNode ticker = tickers.get(i);
-
-                    String trustScore =
-                            ticker.has("trust_score") && !ticker.get("trust_score").isNull()
-                                    ? ticker.get("trust_score").asText()
-                                    : "unknown";
-
-                    exchangeList.add(new ExchangeDTO(
-                            ticker.get("market").get("name").asText(),
-                            ticker.get("base").asText() + "/" + ticker.get("target").asText(),
-                            ticker.get("last").asDouble(),
-                            ticker.get("volume").asDouble(),
-                            trustScore
-                    ));
-                }
-            }
-
-            return exchangeList;
-
-        } catch (Exception e) {
-
-            System.out.println("⚠ Exchange API failed");
-
-            return new ArrayList<>();
-        }
-    }
 
     // =========================
     // MULTIPLE LIVE PRICES
@@ -160,6 +107,74 @@ public class CryptoService {
             System.out.println("⚠ CoinGecko API limit reached or error occurred");
 
             return objectMapper.createObjectNode();
+        }
+    }
+
+    // =========================
+    // SINGLE LIVE PRICE
+    // =========================
+
+    public double getLivePrice(String symbol) {
+
+        String coinId = convertSymbolToCoinId(symbol);
+
+        String url = "https://api.coingecko.com/api/v3/simple/price"
+                + "?ids=" + coinId
+                + "&vs_currencies=usd";
+
+        try {
+
+            JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+
+            if (response == null || !response.has(coinId)) {
+
+                System.out.println("⚠ Coin not found in API response: " + coinId);
+
+                return 0;
+            }
+
+            JsonNode coinNode = response.get(coinId);
+
+            if (!coinNode.has("usd")) {
+
+                System.out.println("⚠ USD price not available");
+
+                return 0;
+            }
+
+            return coinNode.get("usd").asDouble();
+
+        } catch (Exception e) {
+
+            System.out.println("⚠ Failed to fetch live price");
+
+            return 0;
+        }
+    }
+
+    // =========================
+    // SYMBOL → COINGECKO ID
+    // =========================
+
+    private String convertSymbolToCoinId(String symbol) {
+
+        switch (symbol.toUpperCase()) {
+
+            case "BTC": return "bitcoin";
+            case "ETH": return "ethereum";
+            case "SOL": return "solana";
+            case "BNB": return "binancecoin";
+            case "ADA": return "cardano";
+            case "XRP": return "ripple";
+            case "DOGE": return "dogecoin";
+            case "DOT": return "polkadot";
+            case "MATIC": return "matic-network";
+            case "LTC": return "litecoin";
+            case "TRX": return "tron";
+            case "USDT": return "tether";
+
+            default:
+                return symbol.toLowerCase();
         }
     }
 }

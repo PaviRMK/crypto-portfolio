@@ -1,4 +1,4 @@
-package demo.Crypto_Portfolio.app.dto;
+package demo.Crypto_Portfolio.app.dto.portfolio;
 
 public class HoldingLiveDTO {
 

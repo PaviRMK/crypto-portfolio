@@ -1,0 +1,155 @@
+.trade-page{
+
+ padding:30px;
+
+}
+
+/* Trading Panel */
+
+.trade-panel{
+
+ display:flex;
+
+ gap:15px;
+
+ background:#1e293b;
+
+ padding:20px;
+
+ border-radius:10px;
+
+ margin-bottom:25px;
+
+}
+
+.trade-panel select,
+.trade-panel input{
+
+ padding:10px;
+
+ border-radius:6px;
+
+ border:1px solid #334155;
+
+ background:#0f172a;
+
+ color:white;
+
+}
+
+.buy-btn{
+
+ background:#16a34a;
+
+ border:none;
+
+ padding:10px 20px;
+
+ border-radius:6px;
+
+ color:white;
+
+ font-weight:600;
+
+ cursor:pointer;
+
+}
+
+.sell-btn{
+
+ background:#dc2626;
+
+ border:none;
+
+ padding:10px 20px;
+
+ border-radius:6px;
+
+ color:white;
+
+ font-weight:600;
+
+ cursor:pointer;
+
+}
+
+.buy-btn:hover{
+
+ background:#22c55e;
+
+}
+
+.sell-btn:hover{
+
+ background:#ef4444;
+
+}
+
+/* History */
+
+.trade-history-card{
+
+ background:#1e293b;
+
+ padding:25px;
+
+ border-radius:10px;
+
+}
+
+/* Pagination */
+
+.pagination {
+
+  margin-top: 20px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 15px;
+
+}
+
+.pagination button {
+
+  padding: 8px 16px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  background: #3b82f6;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+}
+
+.pagination button:disabled {
+
+  background: #475569;
+
+  cursor: not-allowed;
+
+}
+
+.page-info {
+
+  color: #cbd5f5;
+
+  font-size: 14px;
+
+}
+/* show number input spinner */
+
+.trade-panel input[type="number"]::-webkit-inner-spin-button,
+.trade-panel input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  display: block;
+}

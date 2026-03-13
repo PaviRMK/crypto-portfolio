@@ -1,64 +1,45 @@
 import React, { useEffect, useState, useCallback } from "react";
-import API from "../api";
+import {
+  getPortfolioSummary,
+  getHoldingsLive,
+  getRiskAlerts
+} from "../services/portfolioApi";
+
 import PortfolioSummary from "../Components/PortfolioSummary";
 import HoldingsTable from "../Components/HoldingsTable";
-import TradesTable from "../Components/TradesTable";
-import RiskBadge from "../Components/RiskBadge";
-import TradeForm from "../Components/TradeForm";
-import { useNavigate } from "react-router-dom";
+import RiskAlert from "../Components/RiskAlert";
+
 import "../styles/pages/portfolio.css";
 
 const PortfolioPage = () => {
 
   const userId = 1;
-  const navigate = useNavigate();
 
   const [summary, setSummary] = useState(null);
   const [holdings, setHoldings] = useState([]);
-  const [trades, setTrades] = useState([]);
-  const [risk, setRisk] = useState(null);
+  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* ================= FETCH FUNCTIONS ================= */
-
   const fetchSummary = async () => {
-    const res = await API.get(
-      `/portfolio/summary?userId=${userId}`
-    );
-    setSummary(res.data);
+    const data = await getPortfolioSummary(userId);
+    setSummary(data);
   };
 
   const fetchHoldings = async () => {
-    const res = await API.get(
-      `/portfolio/holdings-live?userId=${userId}`
-    );
-    setHoldings(res.data);
+    const data = await getHoldingsLive(userId);
+    setHoldings(data);
   };
 
-  const fetchTrades = async () => {
-    const res = await API.get(
-      `/portfolio/trades?userId=${userId}`
-    );
-    setTrades(res.data);
+  const fetchAlerts = async () => {
+    const data = await getRiskAlerts(userId);
+    setAlerts(data);
   };
-
-  const fetchRisk = async () => {
-    const res = await API.get(
-      `/portfolio/risk?userId=${userId}`
-    );
-    setRisk(res.data);
-  };
-
-  /* ================= REFRESH ALL ================= */
 
   const refreshAllData = useCallback(async () => {
     await fetchSummary();
     await fetchHoldings();
-    await fetchTrades();
-    await fetchRisk();
+    await fetchAlerts();
   }, []);
-
-  /* ================= INITIAL LOAD ================= */
 
   useEffect(() => {
     const loadData = async () => {
@@ -76,23 +57,11 @@ const PortfolioPage = () => {
   return (
     <div className="portfolio-page">
 
-      <div className="portfolio-header">
-        <h2 className="portfolio-title">Portfolio Overview</h2>
-
-        <button
-          className="back-btn"
-          onClick={() => navigate("/dashboard")}
-        >
-          ← Back to Dashboard
-        </button>
-      </div>
-
       <PortfolioSummary summary={summary} />
-      <RiskBadge risk={risk} />
-      <HoldingsTable holdings={holdings} />
-      <TradesTable trades={trades} />
 
-      <TradeForm onTradeSuccess={refreshAllData} />
+      <RiskAlert alerts={alerts} />
+
+      <HoldingsTable holdings={holdings} />
 
     </div>
   );
