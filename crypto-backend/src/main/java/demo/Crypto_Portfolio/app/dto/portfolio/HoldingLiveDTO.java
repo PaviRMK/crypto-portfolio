@@ -8,13 +8,15 @@ public class HoldingLiveDTO {
     private double livePrice;
     private double currentValue;
     private double unrealizedPnl;
+    private String riskLevel;
 
     public HoldingLiveDTO(String assetSymbol,
                           double quantity,
                           double avgCost,
                           double livePrice,
                           double currentValue,
-                          double unrealizedPnl) {
+                          double unrealizedPnl,
+                          String riskLevel) {
 
         this.assetSymbol = assetSymbol;
         this.quantity = quantity;
@@ -22,6 +24,7 @@ public class HoldingLiveDTO {
         this.livePrice = livePrice;
         this.currentValue = currentValue;
         this.unrealizedPnl = unrealizedPnl;
+        this.riskLevel = riskLevel;
     }
 
     public String getAssetSymbol() { return assetSymbol; }
@@ -30,4 +33,5 @@ public class HoldingLiveDTO {
     public double getLivePrice() { return livePrice; }
     public double getCurrentValue() { return currentValue; }
     public double getUnrealizedPnl() { return unrealizedPnl; }
+    public String getRiskLevel() { return riskLevel; }
 }

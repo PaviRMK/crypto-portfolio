@@ -10,21 +10,22 @@ import org.springframework.context.annotation.Configuration;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-
+@EnableCaching
 public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
+
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
                 "topCoins",
                 "chartData",
-                "exchangeData",
-                "livePrices"
+                "livePrices",
+                "priceChange24h"
         );
 
         cacheManager.setCaffeine(
                 Caffeine.newBuilder()
-                        .maximumSize(500)
+                        .maximumSize(1000)
                         .expireAfterWrite(5, TimeUnit.MINUTES)
         );
 

@@ -1,39 +1,73 @@
 import API from "../api";
 
-/* ==========================
-   PORTFOLIO SUMMARY
-========================== */
+/*
+==========================
+COMMON SAFE REQUEST
+==========================
+*/
+
+const safeRequest = async (requestFn, fallback) => {
+  try {
+    const response = await requestFn();
+    return response.data;
+  } catch (error) {
+    console.error("API Error:", error);
+    return fallback;
+  }
+};
+
+/*
+==========================
+PORTFOLIO SUMMARY
+==========================
+*/
 
 export const getPortfolioSummary = async (userId) => {
 
-  const response = await API.get(
-    `/portfolio/summary?userId=${userId}`
+  return safeRequest(
+    () =>
+      API.get("/portfolio/summary", {
+        params: { userId }
+      }),
+    null
   );
 
-  return response.data;
 };
 
-/* ==========================
-   LIVE HOLDINGS
-========================== */
+
+/*
+==========================
+LIVE HOLDINGS
+==========================
+*/
 
 export const getHoldingsLive = async (userId) => {
-  const response = await API.get("/portfolio/holdings-live", {
-    params: { userId }
-  });
 
-  return response.data;
+  return safeRequest(
+    () =>
+      API.get("/portfolio/holdings-live", {
+        params: { userId }
+      }),
+    []
+  );
+
 };
 
-/* ==========================
-   RISK ALERTS
-========================== */
+
+/*
+==========================
+RISK ALERTS
+==========================
+*/
 
 export const getRiskAlerts = async (userId) => {
 
-  const response = await API.get("/portfolio/risk-alerts", {
-    params: { userId }
-  });
+  return safeRequest(
+    () =>
+      API.get("/portfolio/risk-alerts", {
+        params: { userId }
+      }),
+    []
+  );
 
-  return response.data;
 };

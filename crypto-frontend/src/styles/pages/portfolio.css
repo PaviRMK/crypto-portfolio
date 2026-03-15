@@ -239,3 +239,120 @@
 .empty-text{
   color:#94a3b8;
 }
+
+/* Portfolio Risk Card */
+
+.portfolio-risk-card{
+background:#111c2d;
+border-radius:14px;
+padding:20px;
+margin-bottom:35px;
+border:1px solid rgba(255,255,255,0.05);
+}
+
+.risk-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+}
+
+.risk-description{
+color:#cbd5e1;
+font-size:14px;
+margin-bottom:14px;
+}
+
+.risk-bar-container{
+height:8px;
+background:#1e293b;
+border-radius:6px;
+overflow:hidden;
+}
+
+.risk-bar{
+height:100%;
+border-radius:6px;
+}
+
+.risk-bar.low{
+background:#22c55e;
+}
+
+.risk-bar.medium{
+background:#facc15;
+}
+
+.risk-bar.high{
+background:#ef4444;
+}
+th{
+padding:14px 10px;
+font-weight:500;
+}
+
+td{
+padding:14px 10px;
+}
+
+tr{
+height:55px;
+}
+
+tbody tr{
+border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+tr:hover{
+background:rgba(255,255,255,0.04);
+transition:0.2s ease;
+}
+
+/* Toast Close Button Alignment Fix */
+
+/* ================= TOAST FIX ================= */
+
+.Toastify__toast {
+  display: flex !important;
+  align-items: center !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+}
+
+.Toastify__toast-body {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.Toastify__close-button {
+  align-self: center !important;
+  margin-top: 0 !important;
+  position: relative !important;
+  top: 2px !important;
+  opacity: 0.8 !important;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1 !important;
+}
+
+/* Toast Close Button */
+
+.toast-close-btn{
+  width:24px;
+  height:24px;
+  background:transparent;
+  border:none;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:#cbd5f5;
+  font-size:14px;
+}
+
+.toast-close-btn:hover{
+  background:rgba(255,255,255,0.08);
+}

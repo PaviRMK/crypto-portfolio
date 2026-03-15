@@ -2,63 +2,69 @@ import React, { useEffect, useState } from "react";
 import { getRiskAlerts } from "../services/portfolioApi";
 import "../styles/components/riskAlert.css";
 
-const RiskAlert = () => {
+const RiskAlert = ({ userId }) => {
 
-  const [riskAlerts, setRiskAlerts] = useState([]);
-  const userId = 1;
+  const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
-    const loadAlerts = async () => {
+
+    const fetchAlerts = async () => {
       try {
+
         const data = await getRiskAlerts(userId);
-        setRiskAlerts(data);
+        setAlerts(data);
+
       } catch (error) {
-        console.error("Failed to load risk alerts", error);
+
+        console.error("Risk alert fetch failed", error);
+
       }
     };
 
-    loadAlerts();
-  }, []);
+    fetchAlerts();
 
-  const severityColor = (severity) => {
-    switch (severity) {
-      case "CRITICAL": return "critical";
-      case "HIGH": return "high";
-      case "MEDIUM": return "medium";
-      case "LOW": return "low";
-      default: return "";
-    }
-  };
+  }, [userId]); // IMPORTANT
 
-  if (riskAlerts.length === 0) {
-    return <p className="no-alert">No risk alerts detected.</p>;
+  if (!alerts || alerts.length === 0) {
+    return (
+      <div className="risk-container">
+        <h3>⚠ Portfolio Risk Alerts</h3>
+        <p className="no-alert">No risk alerts detected</p>
+      </div>
+    );
   }
 
   return (
-    <div className="risk-alert-container">
 
-      {riskAlerts.map((alert, index) => (
-        <div className="risk-card" key={index}>
+    <div className="risk-container">
 
-          <div className="risk-header">
-            <span className="coin">{alert.assetSymbol}</span>
+      <h3>⚠ Portfolio Risk Alerts</h3>
 
-            <span className={`severity-badge ${severityColor(alert.severity)}`}>
-              {alert.severity}
-            </span>
+      <div className="risk-alert-container">
+
+        {alerts.map((alert,index)=>(
+          <div className="risk-card" key={index}>
+
+            <div className="risk-header">
+              <span>{alert.assetSymbol}</span>
+
+              <span className={`severity-badge ${alert.severity.toLowerCase()}`}>
+                {alert.severity}
+              </span>
+            </div>
+
+            <p className="risk-message">
+              {alert.message}
+            </p>
+
           </div>
+        ))}
 
-          <p className="risk-message">{alert.message}</p>
-
-          <div className="risk-progress">
-            <div className={`progress-bar ${severityColor(alert.severity)}`}></div>
-          </div>
-
-        </div>
-      ))}
+      </div>
 
     </div>
   );
+
 };
 
 export default RiskAlert;

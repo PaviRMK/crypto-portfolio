@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { syncExchangePortfolio } from "../services/exchangeApi";
+import { syncTrades } from "../services/exchangeApi";
 
-const SyncPortfolioButton = ({ onSynced }) => {
+const SyncTradesButton = ({ onSynced }) => {
 
   const [loading, setLoading] = useState(false);
 
@@ -11,23 +11,24 @@ const SyncPortfolioButton = ({ onSynced }) => {
 
       setLoading(true);
 
-      const data = await syncExchangePortfolio(1,1);
+      const userId = localStorage.getItem("userId") || 1;
 
-      console.log("Sync Response:", data);
+      const data = await syncTrades(userId, 1);
 
-      alert("Portfolio synced successfully");
+      console.log("Trades Sync Response:", data);
 
-      if(onSynced){
+      alert("Trades synced successfully");
+
+      if (onSynced) {
         onSynced();
       }
 
-    } catch(error){
+    } catch (error) {
 
       console.error("Sync Error:", error);
+      alert("Trade sync failed");
 
-      alert("Portfolio sync failed");
-
-    } finally{
+    } finally {
 
       setLoading(false);
 
@@ -36,10 +37,10 @@ const SyncPortfolioButton = ({ onSynced }) => {
   };
 
   return (
-    <button onClick={handleSync}>
-      {loading ? "Syncing..." : "Sync Portfolio"}
+    <button onClick={handleSync} disabled={loading}>
+      {loading ? "Syncing Trades..." : "Sync Trades"}
     </button>
   );
 };
 
-export default SyncPortfolioButton;
+export default SyncTradesButton;

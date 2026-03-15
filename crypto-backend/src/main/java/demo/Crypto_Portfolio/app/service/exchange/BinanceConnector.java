@@ -17,6 +17,7 @@ import java.util.*;
 public class BinanceConnector {
 
     private static final String BASE_URL = "https://testnet.binance.vision";
+    private final RestTemplate restTemplate = new RestTemplate();
 
     // Only keep important coins for the portfolio
     private static final List<String> SUPPORTED_ASSETS =
@@ -138,8 +139,6 @@ public class BinanceConnector {
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            RestTemplate restTemplate = new RestTemplate();
-
             ResponseEntity<String> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -153,6 +152,35 @@ public class BinanceConnector {
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch trades", e);
+        }
+    }
+    public boolean validateApiKey(String apiKey, String secretKey) {
+
+        try {
+
+            long timestamp = System.currentTimeMillis();
+
+            String query = "timestamp=" + timestamp;
+
+            String signature = generateSignature(secretKey, query);
+
+            String url = BASE_URL + "/api/v3/account?" + query + "&signature=" + signature;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-MBX-APIKEY", apiKey);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<String> response =
+                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+            return response.getStatusCode().is2xxSuccessful();
+
+        } catch (Exception e) {
+
+            System.out.println("❌ Invalid Binance API Key or Secret Key");
+
+            return false;
         }
     }
 }

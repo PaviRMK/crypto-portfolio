@@ -36,7 +36,7 @@ public class CryptoService {
         try {
             return restTemplate.getForObject(url, String.class);
         } catch (Exception e) {
-            System.out.println("⚠ Error fetching top coins");
+            System.out.println("⚠ CoinGecko Top Coins API failed");
             return "[]";
         }
     }
@@ -60,7 +60,6 @@ public class CryptoService {
             String response = restTemplate.getForObject(url, String.class);
 
             JsonNode root = objectMapper.readTree(response);
-
             JsonNode prices = root.get("prices");
 
             return objectMapper.convertValue(prices, List.class);
@@ -73,7 +72,6 @@ public class CryptoService {
         }
     }
 
-
     // =========================
     // MULTIPLE LIVE PRICES
     // =========================
@@ -85,13 +83,9 @@ public class CryptoService {
                 + "?ids=" + coinIds
                 + "&vs_currencies=" + currency;
 
-        System.out.println("API URL: " + url);
-
         try {
 
             String response = restTemplate.getForObject(url, String.class);
-
-            System.out.println("API RESPONSE: " + response);
 
             if (response == null || response.isEmpty()) {
 
@@ -104,7 +98,7 @@ public class CryptoService {
 
         } catch (Exception e) {
 
-            System.out.println("⚠ CoinGecko API limit reached or error occurred");
+            System.out.println("⚠ CoinGecko rate limit reached");
 
             return objectMapper.createObjectNode();
         }
@@ -114,6 +108,7 @@ public class CryptoService {
     // SINGLE LIVE PRICE
     // =========================
 
+    @Cacheable(value = "livePrices", key = "#symbol")
     public double getLivePrice(String symbol) {
 
         String coinId = convertSymbolToCoinId(symbol);
@@ -127,22 +122,10 @@ public class CryptoService {
             JsonNode response = restTemplate.getForObject(url, JsonNode.class);
 
             if (response == null || !response.has(coinId)) {
-
-                System.out.println("⚠ Coin not found in API response: " + coinId);
-
                 return 0;
             }
 
-            JsonNode coinNode = response.get(coinId);
-
-            if (!coinNode.has("usd")) {
-
-                System.out.println("⚠ USD price not available");
-
-                return 0;
-            }
-
-            return coinNode.get("usd").asDouble();
+            return response.get(coinId).get("usd").asDouble();
 
         } catch (Exception e) {
 
@@ -150,6 +133,38 @@ public class CryptoService {
 
             return 0;
         }
+    }
+
+    // =========================
+    // 24H CHANGE
+    // =========================
+
+    @Cacheable(value = "priceChange24h", key = "#symbol")
+    public double get24hChange(String symbol) {
+
+        try {
+
+            String coinId = convertSymbolToCoinId(symbol);
+
+            String url = "https://api.coingecko.com/api/v3/coins/markets"
+                    + "?vs_currency=usd&ids=" + coinId;
+
+            JsonNode response = restTemplate.getForObject(url, JsonNode.class);
+
+            if (response != null && response.isArray() && response.size() > 0) {
+
+                return response.get(0)
+                        .get("price_change_percentage_24h")
+                        .asDouble();
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("⚠ CoinGecko rate limit hit for 24h change");
+
+        }
+
+        return 0;
     }
 
     // =========================

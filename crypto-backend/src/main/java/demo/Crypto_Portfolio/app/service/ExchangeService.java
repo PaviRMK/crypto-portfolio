@@ -6,7 +6,7 @@ import demo.Crypto_Portfolio.app.model.Trade;
 
 import demo.Crypto_Portfolio.app.repository.ApiKeyRepository;
 import demo.Crypto_Portfolio.app.repository.HoldingRepository;
-import demo.Crypto_Portfolio.app.repository.TradeRepository;
+
 
 import demo.Crypto_Portfolio.app.dto.exchange.ConnectExchangeRequest;
 import demo.Crypto_Portfolio.app.dto.portfolio.PortfolioBalanceDTO;
@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ExchangeService {
@@ -31,22 +32,22 @@ public class ExchangeService {
     private final HoldingRepository holdingRepository;
     private final ApiKeyRepository apiKeyRepository;
     private final EncryptionService encryptionService;
-    private final TradeRepository tradeRepository;
+    private final PortfolioService portfolioService;
     private final CryptoService cryptoService;
 
     public ExchangeService(ApiKeyRepository apiKeyRepository,
                            EncryptionService encryptionService,
                            BinanceConnector binanceConnector,
                            HoldingRepository holdingRepository,
-                           TradeRepository tradeRepository,
-                           CryptoService cryptoService) {
+                           CryptoService cryptoService,
+                           PortfolioService portfolioService) {
 
         this.apiKeyRepository = apiKeyRepository;
         this.encryptionService = encryptionService;
         this.binanceConnector = binanceConnector;
         this.holdingRepository = holdingRepository;
-        this.tradeRepository = tradeRepository;
         this.cryptoService = cryptoService;
+        this.portfolioService = portfolioService;
     }
 
 // =========================
@@ -54,6 +55,23 @@ public class ExchangeService {
 // =========================
 
     public String connectExchange(ConnectExchangeRequest request) {
+
+        if(request.getApiKey() == null || request.getApiKey().isBlank()){
+            throw new IllegalArgumentException("API key and Secret key are required");
+        }
+
+        if(request.getSecret() == null || request.getSecret().isBlank()){
+            throw new IllegalArgumentException("API key and Secret key are required");
+        }
+
+        boolean valid = binanceConnector.validateApiKey(
+                request.getApiKey(),
+                request.getSecret()
+        );
+
+        if(!valid){
+            throw new IllegalArgumentException("Invalid Binance API Key or Secret Key");
+        }
 
         Optional<ApiKey> existingKey =
                 apiKeyRepository.findByUserIdAndExchangeId(
@@ -165,11 +183,7 @@ public class ExchangeService {
 
                 Trade trade = new Trade();
 
-                trade.setUserId(userId);
-
-                // Convert BTCUSDT → BTC
                 trade.setSymbol(symbol.replace("USDT",""));
-
                 trade.setPrice(t.getDouble("price"));
                 trade.setQuantity(t.getDouble("qty"));
 
@@ -180,7 +194,8 @@ public class ExchangeService {
 
                 trade.setExecutedAt(LocalDateTime.now());
 
-                tradeRepository.save(trade);
+
+                portfolioService.saveTrade(userId, trade);
             }
         }
 

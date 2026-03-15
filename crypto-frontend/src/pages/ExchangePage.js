@@ -3,6 +3,8 @@ import ConnectExchangeForm from "../Components/ConnectExchangeForm";
 import SyncPortfolioButton from "../Components/SyncPortfolioButton";
 import { useNavigate } from "react-router-dom";
 import "../styles/pages/exchangePage.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const ExchangePage = () => {
@@ -29,71 +31,71 @@ const ExchangePage = () => {
   };
 
   return (
-    <div className="exchange-page">
+  <div className="exchange-page">
 
-      <h1>Exchange Integration</h1>
+    <h1>Exchange Integration</h1>
 
-      <div className="exchange-grid">
+    <div className="exchange-grid">
 
-        {/* Connect Exchange Card */}
+      <ConnectExchangeForm onConnected={handleConnected} />
 
-        <ConnectExchangeForm onConnected={handleConnected} />
+      <div className="connected-card">
 
-        {/* Connected Exchanges Card */}
+        <h2>Connected Exchanges</h2>
 
-        <div className="connected-card">
+        {connected ? (
 
-          <h2>Connected Exchanges</h2>
+          <div className="exchange-box">
 
-          {connected ? (
+            <div className="exchange-header">
+              <span className="exchange-name">🟡 Binance</span>
+              <span className="status">Connected</span>
+            </div>
 
-            <div className="exchange-box">
+            <div className="exchange-actions">
 
-              <div className="exchange-header">
+              <SyncPortfolioButton
+                exchangeId={1}
+                onSynced={handleSynced}
+              />
 
-                <span className="exchange-name">
-                  🟡 Binance
-                </span>
-
-                <span className="status">
-                  Connected
-                </span>
-
-              </div>
-
-              <div className="exchange-actions">
-
-                <SyncPortfolioButton
-                  exchangeId={1}
-                  onSynced={handleSynced}
-                />
-
-                <button className="disconnect-btn">
-                  Disconnect
-                </button>
-
-              </div>
-
-              <p className="sync-time">
-                Last Sync: Just now
-              </p>
+              <button className="disconnect-btn">
+                Disconnect
+              </button>
 
             </div>
 
-          ) : (
-
-            <p className="empty-text">
-              No exchange connected yet
+            <p className="sync-time">
+              Last Sync: Just now
             </p>
 
-          )}
+          </div>
 
-        </div>
+        ) : (
+
+          <p className="empty-text">
+            No exchange connected yet
+          </p>
+
+        )}
 
       </div>
 
     </div>
-  );
+
+    {/* IMPORTANT: Toast container */}
+
+    <ToastContainer
+      position="top-right"
+      autoClose={4000}
+      newestOnTop
+      closeOnClick
+      pauseOnHover
+      theme="dark"
+    />
+
+  </div>
+);
 };
 
 export default ExchangePage;

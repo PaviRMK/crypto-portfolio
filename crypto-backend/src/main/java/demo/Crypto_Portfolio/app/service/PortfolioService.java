@@ -7,6 +7,7 @@ import demo.Crypto_Portfolio.app.model.Holding;
 import demo.Crypto_Portfolio.app.model.Trade;
 import demo.Crypto_Portfolio.app.repository.HoldingRepository;
 import demo.Crypto_Portfolio.app.repository.TradeRepository;
+import demo.Crypto_Portfolio.app.service.ScamService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -21,14 +22,17 @@ public class PortfolioService {
     private final HoldingRepository holdingRepository;
     private final CryptoService cryptoService;
     private final TradeRepository tradeRepository;
+    private final ScamService scamService;
 
     public PortfolioService(HoldingRepository holdingRepository,
                             CryptoService cryptoService,
-                            TradeRepository tradeRepository) {
+                            TradeRepository tradeRepository,
+                            ScamService scamService) {
 
         this.holdingRepository = holdingRepository;
         this.cryptoService = cryptoService;
         this.tradeRepository = tradeRepository;
+        this.scamService = scamService;
     }
 
     // =============================
@@ -42,7 +46,6 @@ public class PortfolioService {
     // =============================
     // HOLDINGS WITH LIVE PRICE
     // =============================
-
     public List<HoldingLiveDTO> getHoldingsWithLive(Long userId) {
 
         List<Holding> holdings = holdingRepository.findByUserId(userId);
@@ -73,13 +76,16 @@ public class PortfolioService {
             double invested = quantity * h.getAvgCost();
             double pnl = currentValue - invested;
 
+            String riskLevel = calculateHoldingRisk(pnl, invested);
+
             return new HoldingLiveDTO(
                     h.getAssetSymbol(),
                     quantity,
                     h.getAvgCost(),
                     livePrice,
                     currentValue,
-                    pnl
+                    pnl,
+                    riskLevel
             );
 
         }).toList();
@@ -257,33 +263,87 @@ public class PortfolioService {
             default: return symbol.toLowerCase();
         }
     }
+    private double calculateExposure(Long userId, String symbol) {
+
+        List<Holding> holdings = holdingRepository.findByUserId(userId);
+
+        double total = holdings.stream()
+                .mapToDouble(h -> h.getQuantity() * h.getAvgCost())
+                .sum();
+
+        if(total == 0) return 0;
+
+        for(Holding h : holdings){
+            if(h.getAssetSymbol().equalsIgnoreCase(symbol)){
+
+                double value = h.getQuantity() * h.getAvgCost();
+                return value / total;
+            }
+        }
+
+        return 0;
+    }
     public List<RiskAlertDTO> getRiskAlerts(Long userId) {
 
         List<Holding> holdings = holdingRepository.findByUserId(userId);
         List<RiskAlertDTO> alerts = new ArrayList<>();
 
-        double totalValue = holdings.stream()
-                .mapToDouble(h -> h.getQuantity() * h.getAvgCost())
-                .sum();
+        for(Holding h : holdings){
 
-        for (Holding h : holdings) {
+            String symbol = h.getAssetSymbol();
 
-            double value = h.getQuantity() * h.getAvgCost();
+            // 1️⃣ Portfolio concentration risk
+            double exposure = calculateExposure(userId, symbol);
 
-            if (totalValue == 0) continue;
-
-            double exposure = value / totalValue;
-
-            if (exposure > 0.7) {
-
+            if(exposure > 0.7){
                 alerts.add(new RiskAlertDTO(
-                        h.getAssetSymbol(),
-                        "Portfolio heavily concentrated in " + h.getAssetSymbol(),
+                        symbol,
+                        "Portfolio heavily concentrated in " + symbol,
                         "HIGH"
+                ));
+            }
+
+            // 2️⃣ Volatility risk (CoinGecko)
+            double change = cryptoService.get24hChange(symbol);
+
+            if(Math.abs(change) > 15){
+                alerts.add(new RiskAlertDTO(
+                        symbol,
+                        "High market volatility detected (" + change + "%)",
+                        "MEDIUM"
+                ));
+            }
+
+            // 3️⃣ Scam detection
+            boolean scam = scamService.isScamToken(symbol);
+
+            if(scam){
+                alerts.add(new RiskAlertDTO(
+                        symbol,
+                        "Token flagged in CryptoScamDB",
+                        "CRITICAL"
                 ));
             }
         }
 
         return alerts;
+    }
+    private String calculateHoldingRisk(double pnl, double investment) {
+
+        if (investment == 0) {
+            return "LOW";
+        }
+
+        double pnlPercent = (pnl / investment) * 100;
+
+        if (pnlPercent <= -5) {
+            return "HIGH";
+        }
+        else if (pnlPercent > -5 && pnlPercent < 0) {
+            return "MEDIUM";
+        }
+        else {
+            return "LOW";
+        }
     }
 }

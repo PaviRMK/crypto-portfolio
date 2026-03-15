@@ -1,7 +1,9 @@
 package demo.Crypto_Portfolio.app.service;
 
 import demo.Crypto_Portfolio.app.model.PriceSnapshot;
+import demo.Crypto_Portfolio.app.model.Holding;
 import demo.Crypto_Portfolio.app.repository.PriceSnapshotRepository;
+import demo.Crypto_Portfolio.app.repository.HoldingRepository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -10,51 +12,93 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PriceSnapshotService {
 
     private final PriceSnapshotRepository snapshotRepository;
     private final CryptoService cryptoService;
+    private final HoldingRepository holdingRepository;
 
     public PriceSnapshotService(
             PriceSnapshotRepository snapshotRepository,
-            CryptoService cryptoService) {
+            CryptoService cryptoService,
+            HoldingRepository holdingRepository) {
 
         this.snapshotRepository = snapshotRepository;
         this.cryptoService = cryptoService;
+        this.holdingRepository = holdingRepository;
     }
 
-    // Runs every 10 minutes
-    @Scheduled(fixedRate = 600000)
+    // API used by controller to fetch history
+    public List<PriceSnapshot> getHistory(String symbol) {
 
+        return snapshotRepository.findByCoinSymbolOrderByTimestampDesc(symbol.toUpperCase());
+    }
+
+    // Scheduler runs every 10 minutes
+    @Scheduled(fixedRate = 600000)
     public void capturePriceSnapshots() {
 
-        String coins = "bitcoin,ethereum,solana";
+        List<Holding> holdings = holdingRepository.findAll();
 
-        JsonNode prices = cryptoService.getMultipleLivePrices(coins, "usd");
+        if (holdings.isEmpty()) {
+            return;
+        }
 
-        savePrice(prices, "bitcoin", "BTC");
-        savePrice(prices, "ethereum", "ETH");
-        savePrice(prices, "solana", "SOL");
-    }
+        // Convert symbols → CoinGecko ids
+        String coinIds = holdings.stream()
+                .map(h -> convertSymbolToId(h.getAssetSymbol()))
+                .distinct()
+                .collect(Collectors.joining(","));
 
-    private void savePrice(JsonNode prices, String coinId, String symbol) {
+        JsonNode prices = cryptoService.getMultipleLivePrices(coinIds, "usd");
 
-        if (prices.has(coinId)) {
+        for (Holding holding : holdings) {
 
-            double price = prices.get(coinId).get("usd").asDouble();
+            String symbol = holding.getAssetSymbol();
+            String coinId = convertSymbolToId(symbol);
 
-            PriceSnapshot snapshot =
-                    new PriceSnapshot(symbol, price, LocalDateTime.now());
+            if (prices.has(coinId)) {
 
-            snapshotRepository.save(snapshot);
+                double price = prices.get(coinId).get("usd").asDouble();
+
+                PriceSnapshot snapshot =
+                        new PriceSnapshot(
+                                symbol,
+                                price,
+                                LocalDateTime.now()
+                        );
+
+                snapshotRepository.save(snapshot);
+
+                System.out.println(
+                        "Saved snapshot for " + symbol + " price: " + price
+                );
+            }
         }
     }
 
-    public List<PriceSnapshot> getHistory(String coin) {
+    // Convert crypto symbol → CoinGecko id
+    private String convertSymbolToId(String symbol) {
 
-        return snapshotRepository
-                .findByCoinSymbolOrderByTimestampAsc(coin);
+        switch (symbol.toUpperCase()) {
+
+            case "BTC": return "bitcoin";
+            case "ETH": return "ethereum";
+            case "SOL": return "solana";
+            case "BNB": return "binancecoin";
+            case "ADA": return "cardano";
+            case "XRP": return "ripple";
+            case "DOGE": return "dogecoin";
+            case "DOT": return "polkadot";
+            case "MATIC": return "matic-network";
+            case "TRX": return "tron";
+            case "LTC": return "litecoin";
+            case "USDT": return "tether";
+
+            default: return symbol.toLowerCase();
+        }
     }
 }

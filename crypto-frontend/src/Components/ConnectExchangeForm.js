@@ -1,59 +1,79 @@
 import React, { useState } from "react";
 import { connectExchange } from "../services/exchangeApi";
-import "../styles/components/connectExchange.css";
+import { toast } from "react-toastify";
 
 const ConnectExchangeForm = ({ onConnected }) => {
 
-  const [exchangeId, setExchangeId] = useState(1);
+  const [exchange, setExchange] = useState("Binance");
   const [apiKey, setApiKey] = useState("");
-  const [secret, setSecret] = useState("");
+  const [secretKey, setSecretKey] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleConnect = async () => {
+
+    if (!apiKey.trim()) {
+      toast.error("Please enter API key");
+      return;
+    }
+
+    if (!secretKey.trim()) {
+      toast.error("Please enter Secret key");
+      return;
+    }
 
     try {
 
       setLoading(true);
 
-      await connectExchange({
-        userId: 1,
-        exchangeId: exchangeId,
-        apiKey: apiKey,
-        secret: secret
-      });
+      toast.info("Validating exchange credentials...");
 
-      alert("Exchange Connected Successfully");
+      const response = await connectExchange(exchange, apiKey, secretKey);
 
-      setApiKey("");
-      setSecret("");
+      if (response.success) {
 
-      if (onConnected) onConnected();
+        toast.success(response.message);
 
-    } catch (err) {
-      console.error(err);
-      alert("Connection Failed");
+        if (onConnected) {
+          onConnected();
+        }
+
+      } else {
+
+        toast.error(response.message);
+
+      }
+
+    } catch (error) {
+
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Unable to connect exchange");
+      }
+
     } finally {
+
       setLoading(false);
+
     }
 
   };
 
   return (
+
     <div className="connect-card">
 
       <h2>Connect Exchange</h2>
 
-      <label>Exchange</label>
       <select
-        value={exchangeId}
-        onChange={(e) => setExchangeId(e.target.value)}
+        value={exchange}
+        onChange={(e) => setExchange(e.target.value)}
       >
-        <option value={1}>Binance</option>
-        <option value={2}>Coinbase</option>
-        <option value={3}>Kraken</option>
+        <option>Binance</option>
+        <option>Bybit</option>
+        <option>Coinbase</option>
       </select>
 
-      <label>API Key</label>
       <input
         type="text"
         placeholder="Enter API Key"
@@ -61,19 +81,19 @@ const ConnectExchangeForm = ({ onConnected }) => {
         onChange={(e) => setApiKey(e.target.value)}
       />
 
-      <label>Secret Key</label>
       <input
         type="password"
         placeholder="Enter Secret Key"
-        value={secret}
-        onChange={(e) => setSecret(e.target.value)}
+        value={secretKey}
+        onChange={(e) => setSecretKey(e.target.value)}
       />
 
-      <button onClick={handleConnect}>
+      <button onClick={handleConnect} disabled={loading}>
         {loading ? "Connecting..." : "Connect Exchange"}
       </button>
 
     </div>
+
   );
 };
 

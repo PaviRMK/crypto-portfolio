@@ -6,6 +6,8 @@ import demo.Crypto_Portfolio.app.dto.exchange.ConnectExchangeRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/exchange")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -18,9 +20,37 @@ public class ExchangeController {
     }
 
     @PostMapping("/connect")
-    public String connectExchange(@RequestBody ConnectExchangeRequest request) {
+    public ResponseEntity<?> connectExchange(@RequestBody ConnectExchangeRequest request) {
 
-        return exchangeService.connectExchange(request);
+        try {
+
+            String message = exchangeService.connectExchange(request);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success", true,
+                            "message", message
+                    )
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            return ResponseEntity.badRequest().body(
+                    Map.of(
+                            "success", false,
+                            "message", e.getMessage()
+                    )
+            );
+
+        } catch (Exception e) {
+
+            return ResponseEntity.status(500).body(
+                    Map.of(
+                            "success", false,
+                            "message", "Unable to connect exchange"
+                    )
+            );
+        }
     }
     @GetMapping("/sync")
     public String syncPortfolio(
