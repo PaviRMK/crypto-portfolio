@@ -6,7 +6,8 @@ export const getTopCoins = async (currency, perPage) => {
   const response = await API.get("/crypto/top-coins", {
     params: { currency, perPage }
   });
-  return response.data;
+
+  return response.data?.data || response.data || [];
 };
 
 /* CHART DATA */

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   getPortfolioSummary,
   getHoldingsLive,
@@ -13,8 +13,12 @@ import "react-toastify/dist/ReactToastify.css";
 
 import "../styles/pages/portfolio.css";
 
+/* Toast Close Button */
+
 const ToastCloseButton = ({ closeToast }) => (
-  <button className="toast-close-btn" onClick={closeToast}>✕</button>
+  <button className="toast-close-btn" onClick={closeToast}>
+    ✕
+  </button>
 );
 
 const PortfolioPage = () => {
@@ -26,7 +30,9 @@ const PortfolioPage = () => {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadPortfolioData = async () => {
+  /* LOAD PORTFOLIO DATA */
+
+  const loadPortfolioData = useCallback(async () => {
 
     try {
 
@@ -38,12 +44,6 @@ const PortfolioPage = () => {
       setHoldings(holdingsData);
       setAlerts(alertsData || []);
 
-      if (alertsData?.length > 0) {
-        alertsData.forEach(alert => {
-          toast.warning(alert.message);
-        });
-      }
-
     } catch (error) {
 
       console.error("Portfolio API error", error);
@@ -54,11 +54,33 @@ const PortfolioPage = () => {
 
     }
 
-  };
+  }, [userId]);
+
+  /* FETCH DATA ON PAGE LOAD */
 
   useEffect(() => {
     loadPortfolioData();
-  }, []);
+  }, [loadPortfolioData]);
+
+  /* SHOW TOAST NOTIFICATIONS */
+
+  useEffect(() => {
+
+    if (alerts.length > 0) {
+
+      alerts.forEach(alert => {
+
+        toast.warning(alert.message, {
+          toastId: alert.message
+        });
+
+      });
+
+    }
+
+  }, [alerts]);
+
+  /* LOADING SCREEN */
 
   if (loading) {
     return <div className="loader">Loading Portfolio...</div>;
@@ -86,6 +108,7 @@ const PortfolioPage = () => {
     </div>
 
   );
+
 };
 
 export default PortfolioPage;

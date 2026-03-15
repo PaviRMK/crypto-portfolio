@@ -62,12 +62,10 @@ RISK ALERTS
 
 export const getRiskAlerts = async (userId) => {
 
-  return safeRequest(
-    () =>
-      API.get("/portfolio/risk-alerts", {
-        params: { userId }
-      }),
-    []
+  const response = await API.get(
+    `http://localhost:8080/api/portfolio/risk-alerts?userId=${userId}`
   );
+
+  return response.data;
 
 };

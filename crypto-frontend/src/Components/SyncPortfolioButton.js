@@ -37,7 +37,7 @@ const SyncTradesButton = ({ onSynced }) => {
   };
 
   return (
-    <button onClick={handleSync} disabled={loading}>
+    <button className="sync-btn" onClick={handleSync} disabled={loading}>
       {loading ? "Syncing Trades..." : "Sync Trades"}
     </button>
   );

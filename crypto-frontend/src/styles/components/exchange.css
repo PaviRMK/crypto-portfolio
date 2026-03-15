@@ -1,76 +1,71 @@
-.exchange-container {
-  margin-top: 30px;
-  animation: fadeSlide 0.3s ease-in-out;
+/* Connected Exchange Card */
+
+.exchange-box{
+  background:#162335;
+  border-radius:14px;
+  padding:22px;
+  margin-top:20px;
+  border:1px solid rgba(255,255,255,0.05);
 }
 
-.exchange-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #ffffff;
+.exchange-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
 }
 
-/* Table */
-.exchange-table {
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: 12px;
-  overflow: hidden;
+.exchange-name{
+  font-size:18px;
+  font-weight:600;
+  color:white;
 }
 
-.exchange-table th {
-  text-align: left;
-  padding: 18px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-light);
-  border-bottom: 1px solid var(--border-color);
+.status{
+  color:#22c55e;
+  font-weight:600;
 }
 
-.exchange-table td {
-  padding: 18px;
-  font-size: 14px;
-  border-bottom: 1px solid #1e293b;
-  color: #ffffff;
+.exchange-actions{
+  display:flex;
+  gap:12px;
+  margin-top:10px;
 }
 
-.exchange-table tr:hover {
-  background: #1e293b;
-  transition: 0.2s;
+.exchange-actions button{
+  font-size:14px;
+  padding:8px 16px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  transition:0.2s ease;
 }
 
-/* Trust Badge */
-.trust {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
+/* Sync Button */
+
+.sync-btn{
+  background:#22c55e !important;
+  color:#ffffff !important;
+  border-radius:20px !important;
 }
 
-.trust.green {
-  background: rgba(34,197,94,0.15);
-  color: #22c55e;
+.sync-btn:hover{
+  background:#16a34a !important;
 }
 
-.trust.red {
-  background: rgba(239,68,68,0.15);
-  color: #ef4444;
+/* Disconnect Button */
+
+.disconnect-btn{
+  background:#ef4444;
+  color:white;
 }
 
-.trust.yellow {
-  background: rgba(234,179,8,0.15);
-  color: #eab308;
+.disconnect-btn:hover{
+  background:#dc2626;
 }
 
-/* Smooth Animation */
-@keyframes fadeSlide {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.sync-time{
+  margin-top:12px;
+  font-size:13px;
+  color:#9ca3af;
 }
