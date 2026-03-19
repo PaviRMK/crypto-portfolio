@@ -48,9 +48,17 @@ const HoldingsTable = ({ holdings }) => {
 
                 {/* Risk */}
                 <td>
-                  <span className={`risk-badge ${riskLevel.toLowerCase()}`}>
-                    {riskLevel}
-                  </span>
+                  <td>
+                    {riskLevel === "CRITICAL" ? (
+                      <span className="risk-badge critical">
+                        🚨 SCAM
+                      </span>
+                    ) : (
+                      <span className={`risk-badge ${riskLevel.toLowerCase()}`}>
+                        {riskLevel}
+                      </span>
+                    )}
+                  </td>
                 </td>
 
                 {/* Quantity */}

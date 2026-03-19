@@ -9,11 +9,14 @@ import demo.Crypto_Portfolio.app.model.Trade;
 import demo.Crypto_Portfolio.app.repository.HoldingRepository;
 import demo.Crypto_Portfolio.app.repository.PriceSnapshotRepository;
 import demo.Crypto_Portfolio.app.repository.TradeRepository;
+import demo.Crypto_Portfolio.app.repository.RiskAlertRepository;
+import demo.Crypto_Portfolio.app.model.RiskAlert;
 
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class PortfolioService {
@@ -23,19 +26,22 @@ public class PortfolioService {
     private final ScamService scamService;
     private final PriceSnapshotRepository snapshotRepository;
     private final CryptoService cryptoService;
+    private final RiskAlertRepository riskAlertRepository;
 
     public PortfolioService(
             HoldingRepository holdingRepository,
             TradeRepository tradeRepository,
-            ScamService scamService,
             PriceSnapshotRepository snapshotRepository,
-            CryptoService cryptoService){
+            CryptoService cryptoService,
+            ScamService scamService,
+            RiskAlertRepository riskAlertRepository){
 
         this.holdingRepository = holdingRepository;
         this.tradeRepository = tradeRepository;
-        this.scamService = scamService;
         this.snapshotRepository = snapshotRepository;
         this.cryptoService=cryptoService;
+        this.riskAlertRepository=riskAlertRepository;
+        this.scamService = scamService;
     }
 
     // =============================
@@ -152,6 +158,9 @@ public class PortfolioService {
         holding.setUserId(trade.getUserId());
         holding.setAssetSymbol(symbol);
 
+        // 🔥 ADD THIS LINE
+        holding.setContractAddress(trade.getContractAddress());
+
         double currentQty = holding.getQuantity();
 
         if ("BUY".equalsIgnoreCase(trade.getSide())) {
@@ -211,60 +220,90 @@ public class PortfolioService {
     // =============================
     // RISK ALERTS
     // =============================
-
     public List<RiskAlertDTO> getRiskAlerts(Long userId) {
 
         List<Holding> holdings = holdingRepository.findByUserId(userId);
+
         List<RiskAlertDTO> alerts = new ArrayList<>();
 
-        if (holdings.isEmpty()) {
-            return alerts;
+        double totalValue = 0;
+
+        // Calculate total portfolio value
+        for (Holding h : holdings) {
+
+            double livePrice = snapshotRepository
+                    .findTopByCoinSymbolOrderByTimestampDesc(h.getAssetSymbol())
+                    .map(PriceSnapshot::getPrice)
+                    .orElse(0.0);
+
+            totalValue += h.getQuantity() * livePrice;
         }
 
-        // calculate total portfolio value
-        double totalValue = holdings.stream()
-                .mapToDouble(h -> h.getQuantity() * h.getAvgCost())
-                .sum();
-
+        // Generate alerts
         for (Holding h : holdings) {
 
             String symbol = h.getAssetSymbol();
 
-            double coinValue = h.getQuantity() * h.getAvgCost();
-            double exposure = totalValue == 0 ? 0 : coinValue / totalValue;
+            double livePrice = snapshotRepository
+                    .findTopByCoinSymbolOrderByTimestampDesc(symbol)
+                    .map(PriceSnapshot::getPrice)
+                    .orElse(0.0);
 
-            // 1️⃣ Portfolio concentration risk
+            double value = h.getQuantity() * livePrice;
+            double investment = h.getQuantity() * h.getAvgCost();
+
+            double exposure = totalValue == 0 ? 0 : value / totalValue;
+
+            // =============================
+            // 1️⃣ Concentration Risk
+            // =============================
             if (exposure > 0.5) {
 
                 alerts.add(new RiskAlertDTO(
                         symbol,
-                        "Portfolio heavily concentrated in " + symbol,
+                        "⚠️ " + (int)(exposure * 100) + "% of your portfolio is in " + symbol + ". Consider diversifying.",
                         "HIGH"
                 ));
             }
 
-            // 2️⃣ Market volatility risk
-            double change = cryptoService.get24hChange(symbol);
+            // =============================
+            // 2️⃣ Loss Risk
+            // =============================
+            double pnlPercent = investment == 0 ? 0 : ((value - investment) / investment) * 100;
 
-            if (Math.abs(change) > 10) {
+            if (pnlPercent < -5) {
 
                 alerts.add(new RiskAlertDTO(
                         symbol,
-                        "High volatility detected (" + change + "%)",
+                        "📉 " + symbol + " dropped " + String.format("%.2f", Math.abs(pnlPercent)) + "% from your buy price. Review your position.",
                         "MEDIUM"
                 ));
             }
 
-            // 3️⃣ Scam detection
-            boolean scam = scamService.isScamToken(symbol);
+            // =============================
+            // 3️⃣ Scam Detection
+            // =============================
+            String contractAddress = h.getContractAddress();
+
+            boolean scam = scamService.isScamToken(contractAddress);
 
             if (scam) {
 
                 alerts.add(new RiskAlertDTO(
                         symbol,
-                        "Token flagged in CryptoScamDB",
+                        "🚨 " + symbol + " is flagged as a scam token. Avoid trading immediately.",
                         "CRITICAL"
                 ));
+
+                RiskAlert entity = new RiskAlert(
+                        userId,
+                        symbol,
+                        "SCAM",
+                        "Token flagged as scam",
+                        LocalDateTime.now()
+                );
+
+                riskAlertRepository.save(entity);
             }
         }
 

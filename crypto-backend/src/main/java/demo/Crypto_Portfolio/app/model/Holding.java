@@ -47,4 +47,15 @@ public class Holding {
     public void setCoinId(String coinId) {
         this.coinId = coinId;
     }
+
+    @Column(name = "contract_address")
+    private String contractAddress;
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 }

@@ -118,8 +118,6 @@
   border-collapse: collapse;
 }
 
-/* table header */
-
 .portfolio-table th {
   text-align: left;
   padding: 14px 10px;
@@ -129,21 +127,15 @@
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
 }
 
-/* table rows */
-
 .portfolio-table tbody tr {
   height: 55px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
-/* table cells */
-
 .portfolio-table td {
   padding: 14px 12px;
   font-size: 14px;
 }
-
-/* hover interaction */
 
 .portfolio-table tbody tr:hover {
   background: rgba(255,255,255,0.04);
@@ -151,166 +143,165 @@
   cursor: pointer;
 }
 
-/* ================= ASSET CELL ================= */
+/* ================= ASSET ================= */
 
-.asset-cell{
-  display:flex;
-  align-items:center;
-  gap:10px;
+.asset-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.asset-name{
-  font-weight:600;
+.asset-name {
+  font-weight: 600;
 }
 
 /* ================= RISK BADGE ================= */
 
-.risk-badge{
-  font-size:11px;
-  padding:4px 10px;
-  border-radius:20px;
-  font-weight:600;
+.risk-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
 }
 
-.risk-badge.low{
-  background:#22c55e;
+.risk-badge.low {
+  background: #22c55e;
 }
 
-.risk-badge.medium{
-  background:#facc15;
-  color:black;
+.risk-badge.medium {
+  background: #facc15;
+  color: black;
 }
 
-.risk-badge.high{
-  background:#ef4444;
+.risk-badge.high {
+  background: #ef4444;
+}
+
+.risk-badge.critical {
+  background: #ff4d4d;
+  color: white;
+  font-weight: bold;
 }
 
 /* ================= TOOLTIP ================= */
 
-.risk-wrapper{
-  position:relative;
+.risk-wrapper {
+  position: relative;
 }
 
-.tooltip{
-  position:absolute;
-  top:-70px;
-  left:110%;
-  background:#0f172a;
-  padding:12px;
-  border-radius:10px;
-  width:220px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.4);
-  opacity:0;
-  pointer-events:none;
-  transition:0.2s;
+.tooltip {
+  position: absolute;
+  top: -70px;
+  left: 110%;
+  background: #0f172a;
+  padding: 12px;
+  border-radius: 10px;
+  width: 220px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s;
 }
 
-.risk-wrapper:hover .tooltip{
-  opacity:1;
+.risk-wrapper:hover .tooltip {
+  opacity: 1;
 }
 
-/* ================= TOOLTIP TEXT ================= */
-
-.tooltip h4{
-  font-size:13px;
-  margin-bottom:6px;
+.tooltip h4 {
+  font-size: 13px;
+  margin-bottom: 6px;
 }
 
-.tooltip p{
-  font-size:12px;
-  color:#cbd5f5;
-  margin:2px 0;
+.tooltip p {
+  font-size: 12px;
+  color: #cbd5f5;
+  margin: 2px 0;
 }
 
 /* ================= PNL COLORS ================= */
 
-.green{
-  color:#22c55e;
-  font-weight:600;
+.green {
+  color: #22c55e;
+  font-weight: 600;
 }
 
-.red{
-  color:#ef4444;
-  font-weight:600;
+.red {
+  color: #ef4444;
+  font-weight: 600;
 }
 
-/* ================= EMPTY STATE ================= */
+/* ================= EMPTY ================= */
 
-.empty-text{
-  color:#94a3b8;
+.empty-text {
+  color: #94a3b8;
 }
 
-/* Portfolio Risk Card */
+/* ================= PORTFOLIO RISK CARD ================= */
 
-.portfolio-risk-card{
-background:#111c2d;
-border-radius:14px;
-padding:20px;
-margin-bottom:35px;
-border:1px solid rgba(255,255,255,0.05);
+.portfolio-risk-card {
+  background: #111c2d;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 35px;
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
-.risk-top{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
+.risk-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.risk-description{
-color:#cbd5e1;
-font-size:14px;
-margin-bottom:14px;
+.risk-description {
+  color: #cbd5e1;
+  font-size: 14px;
+  margin-bottom: 14px;
 }
 
-.risk-bar-container{
-height:8px;
-background:#1e293b;
-border-radius:6px;
-overflow:hidden;
+.risk-bar-container {
+  height: 8px;
+  background: #1e293b;
+  border-radius: 6px;
+  overflow: hidden;
 }
 
-.risk-bar{
-height:100%;
-border-radius:6px;
+.risk-bar {
+  height: 100%;
+  border-radius: 6px;
 }
 
-.risk-bar.low{
-background:#22c55e;
+.risk-bar.low {
+  background: #22c55e;
 }
 
-.risk-bar.medium{
-background:#facc15;
+.risk-bar.medium {
+  background: #facc15;
 }
 
-.risk-bar.high{
-background:#ef4444;
-}
-th{
-padding:14px 10px;
-font-weight:500;
+.risk-bar.high {
+  background: #ef4444;
 }
 
-td{
-padding:14px 10px;
+/* ================= TABLE RESET ================= */
+
+th, td {
+  padding: 14px 10px;
 }
 
-tr{
-height:55px;
+tr {
+  height: 55px;
 }
 
-tbody tr{
-border-bottom:1px solid rgba(255,255,255,0.06);
+tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
-tr:hover{
-background:rgba(255,255,255,0.04);
-transition:0.2s ease;
+tr:hover {
+  background: rgba(255,255,255,0.04);
 }
 
-/* Toast Close Button Alignment Fix */
-
-/* ================= TOAST FIX ================= */
+/* ================= TOAST BASE FIX ================= */
 
 .Toastify__toast {
   display: flex !important;
@@ -326,10 +317,8 @@ transition:0.2s ease;
 }
 
 .Toastify__close-button {
-  align-self: center !important;
-  margin-top: 0 !important;
-  position: relative !important;
-  top: 2px !important;
+  width: 18px !important;
+  height: 18px !important;
   opacity: 0.8 !important;
 }
 
@@ -337,22 +326,55 @@ transition:0.2s ease;
   opacity: 1 !important;
 }
 
-/* Toast Close Button */
+/* Custom close button */
 
-.toast-close-btn{
-  width:24px;
-  height:24px;
-  background:transparent;
-  border:none;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  color:#cbd5f5;
-  font-size:14px;
+.toast-close-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #cbd5f5;
+  font-size: 14px;
 }
 
-.toast-close-btn:hover{
-  background:rgba(255,255,255,0.08);
+.toast-close-btn:hover {
+  background: rgba(255,255,255,0.08);
 }
+
+/* ================= CUSTOM ALERT TOASTS ================= */
+
+/* 🔴 SCAM */
+.toast-scam {
+  background: linear-gradient(135deg, #7f1d1d, #b91c1c) !important;
+  color: white !important;
+  border-left: 6px solid #ff0000;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* 🟡 HIGH */
+.toast-high {
+  background: #78350f !important;
+  color: #facc15 !important;
+}
+
+/* 🔵 LOW */
+.toast-low {
+  background: #1e3a8a !important;
+  color: #93c5fd !important;
+}
+
+/* spacing */
+.Toastify__toast-container {
+  width: 340px !important;
+}
+
+.Toastify__toast {
+  margin-bottom: 10px !important;
+}
+

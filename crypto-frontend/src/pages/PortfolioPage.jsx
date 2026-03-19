@@ -30,7 +30,7 @@ const PortfolioPage = () => {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* LOAD PORTFOLIO DATA */
+  /* ================= LOAD DATA ================= */
 
   const loadPortfolioData = useCallback(async () => {
 
@@ -44,6 +44,9 @@ const PortfolioPage = () => {
       setHoldings(holdingsData);
       setAlerts(alertsData || []);
 
+      /* 🔔 STORE ALERTS FOR NAVBAR PANEL */
+      localStorage.setItem("alerts", JSON.stringify(alertsData || []));
+
     } catch (error) {
 
       console.error("Portfolio API error", error);
@@ -56,35 +59,55 @@ const PortfolioPage = () => {
 
   }, [userId]);
 
-  /* FETCH DATA ON PAGE LOAD */
+  /* ================= AUTO REFRESH ================= */
 
   useEffect(() => {
+
     loadPortfolioData();
+
+    const interval = setInterval(() => {
+      loadPortfolioData();
+    }, 30000); // 30 sec
+
+    return () => clearInterval(interval);
+
   }, [loadPortfolioData]);
 
-  /* SHOW TOAST NOTIFICATIONS */
+  /* ================= TOAST (ONLY SCAM) ================= */
 
   useEffect(() => {
 
-    if (alerts.length > 0) {
+    if (!alerts || alerts.length === 0) return;
 
-      alerts.forEach(alert => {
+    alerts.forEach(alert => {
 
-        toast.warning(alert.message, {
-          toastId: alert.message
-        });
+      const toastId = alert.assetSymbol + alert.message;
 
-      });
+      /* 🚨 ONLY SHOW TOAST FOR CRITICAL */
+      if (alert.severity === "CRITICAL") {
 
-    }
+        toast.error(
+          `🚨 Scam Alert: ${alert.assetSymbol} is flagged as malicious`,
+          {
+            toastId,
+            className: "toast-scam",
+            autoClose: false
+          }
+        );
+
+      }
+
+    });
 
   }, [alerts]);
 
-  /* LOADING SCREEN */
+  /* ================= LOADING ================= */
 
   if (loading) {
     return <div className="loader">Loading Portfolio...</div>;
   }
+
+  /* ================= UI ================= */
 
   return (
 
@@ -94,6 +117,8 @@ const PortfolioPage = () => {
 
       <HoldingsTable holdings={holdings} />
 
+      {/* Toast only for scam alerts */}
+
       <ToastContainer
         position="top-right"
         autoClose={4000}
@@ -102,6 +127,8 @@ const PortfolioPage = () => {
         pauseOnHover
         theme="dark"
         closeButton={ToastCloseButton}
+        limit={3}
+        hideProgressBar={true}
         style={{ marginTop: "60px" }}
       />
 

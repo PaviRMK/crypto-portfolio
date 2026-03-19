@@ -76,4 +76,14 @@ public class Trade {
     public void setExecutedAt(LocalDateTime executedAt) {
         this.executedAt = executedAt;
     }
+    @Column(name = "contract_address")
+    private String contractAddress;
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 }
