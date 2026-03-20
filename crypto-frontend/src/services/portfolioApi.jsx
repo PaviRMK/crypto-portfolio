@@ -23,7 +23,6 @@ PORTFOLIO SUMMARY
 */
 
 export const getPortfolioSummary = async (userId) => {
-
   return safeRequest(
     () =>
       API.get("/portfolio/summary", {
@@ -31,9 +30,7 @@ export const getPortfolioSummary = async (userId) => {
       }),
     null
   );
-
 };
-
 
 /*
 ==========================
@@ -42,7 +39,6 @@ LIVE HOLDINGS
 */
 
 export const getHoldingsLive = async (userId) => {
-
   return safeRequest(
     () =>
       API.get("/portfolio/holdings-live", {
@@ -50,9 +46,7 @@ export const getHoldingsLive = async (userId) => {
       }),
     []
   );
-
 };
-
 
 /*
 ==========================
@@ -61,11 +55,61 @@ RISK ALERTS
 */
 
 export const getRiskAlerts = async (userId) => {
-
-  const response = await API.get(
-    `http://localhost:8080/api/portfolio/risk-alerts?userId=${userId}`
+  return safeRequest(
+    () =>
+      API.get("/portfolio/risk-alerts", {
+        params: { userId }
+      }),
+    []
   );
+};
+
+/*
+==========================
+PNL SUMMARY
+==========================
+*/
+
+export const getPnlSummary = async (userId) => {
+  return safeRequest(
+    () =>
+      API.get("/portfolio/pnl", {
+        params: { userId }
+      }),
+    null
+  );
+};
+
+/*
+==========================
+EXPORT CSV
+==========================
+*/
+
+export const exportPortfolio = async (userId) => {
+  const response = await API.get("/portfolio/export", {
+    params: { userId },
+    responseType: "blob"
+  });
 
   return response.data;
+};
 
+/*
+==========================
+TAX HINT
+==========================
+*/
+
+export const getTaxHint = async (userId) => {
+  return safeRequest(
+    async () => {
+      const res = await API.get("/portfolio/tax-hint", {
+        params: { userId }
+      });
+      console.log("TAX API RESPONSE:", res);
+      return res;
+    },
+    ""
+  );
 };

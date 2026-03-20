@@ -1,128 +1,66 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Notifications from "./Notifications"; // ✅ IMPORT THIS
 import "../styles/components/navbar.css";
 
 function Navbar() {
 
-  const [showPanel, setShowPanel] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [alerts, setAlerts] = useState([]);
-
-  /* LOAD ALERTS FROM LOCAL STORAGE */
 
   useEffect(() => {
     const storedAlerts = JSON.parse(localStorage.getItem("alerts")) || [];
     setAlerts(storedAlerts);
   }, []);
 
-  /* CLOSE PANEL WHEN CLICK OUTSIDE */
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!e.target.closest(".notification-wrapper")) {
-        setShowPanel(false);
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+  const totalAlerts = alerts.length;
 
   return (
+
     <nav className="navbar">
 
-      {/* LOGO */}
-      <div className="logo">
-        CryptoTrack
-      </div>
+      {/* LEFT */}
+      <div className="logo">CryptoTrack</div>
 
-      {/* NAV LINKS */}
-      <div className="nav-links">
-        <Link to="/dashboard">Dashboard</Link>
-        <Link to="/portfolio">Portfolio</Link>
-        <Link to="/exchange">Exchange</Link>
-        <Link to="/trade">Trade</Link>
-      </div>
+      {/* RIGHT SIDE */}
+      <div className="nav-right">
 
-      {/* 🔔 NOTIFICATION */}
-      <div className="notification-wrapper">
-
-        {/* ICON */}
-        <div
-          className="notification-icon"
-          onClick={() => setShowPanel(!showPanel)}
-        >
-          🔔
-
-          {alerts.length > 0 && (
-            <span className="notification-badge">
-              {alerts.length}
-            </span>
-          )}
+        <div className="nav-links">
+          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/portfolio">Portfolio</Link>
+          <Link to="/exchange">Exchange</Link>
+          <Link to="/trade">Trade</Link>
         </div>
 
-        {/* PANEL */}
-        {showPanel && (
-          <div className="notification-panel">
+        {/* 🔔 NOTIFICATION ICON */}
+        <div className="notification-wrapper">
 
-            <h4>Notifications</h4>
+          <div
+            className="notification-icon"
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
+            🔔
 
-            {alerts.length === 0 ? (
-              <p className="empty-text">No alerts</p>
-            ) : (
-
-              <>
-
-                {/* 🚨 SCAM ALERTS */}
-                {alerts.filter(a => a.severity === "CRITICAL").length > 0 && (
-                  <>
-                    <div className="alert-group-title">🚨 Scam Alerts</div>
-
-                    {alerts
-                      .filter(a => a.severity === "CRITICAL")
-                      .map((alert, i) => (
-                        <div key={i} className="alert-item critical">
-                          {alert.assetSymbol} - {alert.message}
-                        </div>
-                      ))}
-                  </>
-                )}
-
-                {/* ⚠ RISK ALERTS */}
-                {alerts.filter(a => a.severity === "HIGH").length > 0 && (
-                  <>
-                    <div className="alert-group-title">⚠ Risk Alerts</div>
-
-                    {alerts
-                      .filter(a => a.severity === "HIGH")
-                      .map((alert, i) => (
-                        <div key={i} className="alert-item high">
-                          {alert.assetSymbol} - {alert.message}
-                        </div>
-                      ))}
-                  </>
-                )}
-
-                {/* 📉 LOW ALERTS */}
-                {alerts.filter(a => a.severity === "LOW").length > 0 && (
-                  <>
-                    <div className="alert-group-title">📉 Info</div>
-
-                    {alerts
-                      .filter(a => a.severity === "LOW")
-                      .map((alert, i) => (
-                        <div key={i} className="alert-item low">
-                          {alert.assetSymbol} - {alert.message}
-                        </div>
-                      ))}
-                  </>
-                )}
-
-              </>
-
+            {totalAlerts > 0 && (
+              <span className="notification-badge">
+                {totalAlerts}
+              </span>
             )}
-
           </div>
-        )}
+
+          {/* ✅ USE COMPONENT INSTEAD OF INLINE UI */}
+          {showNotifications && (
+            <Notifications
+              notifications={alerts.map(a => ({
+                asset: a.assetSymbol,
+                message: `${a.assetSymbol} - ${a.message}`,
+                type: a.severity === "CRITICAL" ? "scam" : "risk"
+              }))}
+              onClose={() => setShowNotifications(false)}
+            />
+          )}
+
+        </div>
 
       </div>
 

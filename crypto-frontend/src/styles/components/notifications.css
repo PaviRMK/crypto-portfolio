@@ -1,0 +1,92 @@
+.notification-panel {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 340px;
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+/* HEADER */
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.notification-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.notification-header button {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+/* GROUP */
+.notification-group {
+  margin-bottom: 12px;
+}
+
+.group-title {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+/* ITEM */
+.notification-item {
+  background: rgba(255,255,255,0.03);
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: 0.2s;
+}
+
+.notification-item.unread {
+  background: rgba(255,255,255,0.05);
+}
+
+.notification-item:hover {
+  transform: scale(1.02);
+}
+
+/* CONTENT */
+.notif-content {
+  display: flex;
+  gap: 10px;
+}
+
+.notif-icon {
+  font-size: 16px;
+}
+
+.notif-text p {
+  font-size: 13px;
+  margin: 0;
+}
+
+.notif-text span {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ACTIONS */
+.notif-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.notif-actions button {
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+}

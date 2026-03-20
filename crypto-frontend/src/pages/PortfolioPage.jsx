@@ -2,24 +2,18 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   getPortfolioSummary,
   getHoldingsLive,
-  getRiskAlerts
+  getRiskAlerts,
+  getPnlSummary,
+  exportPortfolio,
+  getTaxHint
 } from "../services/portfolioApi";
 
 import PortfolioSummary from "../Components/PortfolioSummary";
 import HoldingsTable from "../Components/HoldingsTable";
-
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import "../styles/pages/portfolio.css";
-
-/* Toast Close Button */
-
-const ToastCloseButton = ({ closeToast }) => (
-  <button className="toast-close-btn" onClick={closeToast}>
-    ✕
-  </button>
-);
 
 const PortfolioPage = () => {
 
@@ -28,97 +22,113 @@ const PortfolioPage = () => {
   const [summary, setSummary] = useState(null);
   const [holdings, setHoldings] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [pnl, setPnl] = useState(null);
+  const [taxHint, setTaxHint] = useState("");
   const [loading, setLoading] = useState(true);
+
 
   /* ================= LOAD DATA ================= */
 
   const loadPortfolioData = useCallback(async () => {
-
     try {
-
-      const summaryData = await getPortfolioSummary(userId);
-      const holdingsData = await getHoldingsLive(userId);
-      const alertsData = await getRiskAlerts(userId);
+      const [
+        summaryData,
+        holdingsData,
+        alertsData,
+        pnlData,
+        taxData
+      ] = await Promise.all([
+        getPortfolioSummary(userId),
+        getHoldingsLive(userId),
+        getRiskAlerts(userId),
+        getPnlSummary(userId),
+        getTaxHint(userId)
+      ]);
 
       setSummary(summaryData);
       setHoldings(holdingsData);
       setAlerts(alertsData || []);
+      setPnl(pnlData);
+      setTaxHint(taxData);
 
-      /* 🔔 STORE ALERTS FOR NAVBAR PANEL */
       localStorage.setItem("alerts", JSON.stringify(alertsData || []));
 
     } catch (error) {
-
-      console.error("Portfolio API error", error);
-
+      console.error("Portfolio error:", error);
     } finally {
-
       setLoading(false);
-
     }
-
   }, [userId]);
 
   /* ================= AUTO REFRESH ================= */
 
   useEffect(() => {
-
     loadPortfolioData();
-
-    const interval = setInterval(() => {
-      loadPortfolioData();
-    }, 30000); // 30 sec
-
+    const interval = setInterval(loadPortfolioData, 30000);
     return () => clearInterval(interval);
-
   }, [loadPortfolioData]);
 
-  /* ================= TOAST (ONLY SCAM) ================= */
+  /* ================= SCAM ALERT TOAST ================= */
 
   useEffect(() => {
+    const scam = alerts.find((a) => a.severity === "CRITICAL");
 
-    if (!alerts || alerts.length === 0) return;
-
-    alerts.forEach(alert => {
-
-      const toastId = alert.assetSymbol + alert.message;
-
-      /* 🚨 ONLY SHOW TOAST FOR CRITICAL */
-      if (alert.severity === "CRITICAL") {
-
-        toast.error(
-          `🚨 Scam Alert: ${alert.assetSymbol} is flagged as malicious`,
-          {
-            toastId,
-            className: "toast-scam",
-            autoClose: false
-          }
-        );
-
-      }
-
-    });
-
+    if (scam) {
+      toast.error(`${scam.assetSymbol} is flagged as a SCAM token`, {
+        toastId: `scam-${scam.assetSymbol}`
+      });
+    }
   }, [alerts]);
 
-  /* ================= LOADING ================= */
+  /* ================= EXPORT ================= */
 
-  if (loading) {
-    return <div className="loader">Loading Portfolio...</div>;
-  }
+  const handleExport = async () => {
+    try {
+      const blob = await exportPortfolio(userId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "portfolio.csv";
+      a.click();
+    } catch (error) {
+      console.error("Export failed", error);
+    }
+  };
 
-  /* ================= UI ================= */
+  if (loading) return <div className="loader">Loading...</div>;
 
   return (
-
     <div className="portfolio-page">
 
       <PortfolioSummary summary={summary} />
 
-      <HoldingsTable holdings={holdings} />
+      {pnl && (
+        <div className="pnl-grid">
+          <div className="pnl-card green">
+            Realized Profit & Loss <br />
+            ${pnl.realizedPnl?.toFixed(2)}
+          </div>
+          <div className="pnl-card yellow">
+            Unrealized Profit & Loss <br />
+            ${pnl.unrealizedPnl?.toFixed(2)}
+          </div>
+        </div>
+      )}
 
-      {/* Toast only for scam alerts */}
+      {taxHint && (
+        <div className="tax-hint">
+          💡 {taxHint}
+        </div>
+      )}
 
+      <button className="export-btn" onClick={handleExport}>
+        Export Portfolio CSV
+      </button>
+
+      {/* HOLDINGS */}
+      <HoldingsTable holdings={holdings} alerts={alerts} />
+
+   
       <ToastContainer
         position="top-right"
         autoClose={4000}
@@ -126,16 +136,10 @@ const PortfolioPage = () => {
         closeOnClick
         pauseOnHover
         theme="dark"
-        closeButton={ToastCloseButton}
-        limit={3}
-        hideProgressBar={true}
-        style={{ marginTop: "60px" }}
       />
 
     </div>
-
   );
-
 };
 
 export default PortfolioPage;

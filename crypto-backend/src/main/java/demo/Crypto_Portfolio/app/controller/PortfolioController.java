@@ -9,6 +9,9 @@ import demo.Crypto_Portfolio.app.model.*;
 import demo.Crypto_Portfolio.app.dto.portfolio.PortfolioSummaryDTO;
 import demo.Crypto_Portfolio.app.dto.portfolio.HoldingLiveDTO;
 import demo.Crypto_Portfolio.app.dto.portfolio.RiskAlertDTO;
+import demo.Crypto_Portfolio.app.dto.portfolio.PnlSummaryDTO;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/portfolio")
@@ -23,7 +26,7 @@ public class PortfolioController {
     }
 
 
-    // 🔥 NEW LIVE HOLDINGS API
+    // LIVE HOLDINGS API
     @GetMapping("/holdings-live")
     public ResponseEntity<List<HoldingLiveDTO>> getHoldingsLive(
             @RequestParam Long userId) {
@@ -73,6 +76,20 @@ public class PortfolioController {
 
         return ResponseEntity.ok(
                 portfolioService.getTrades(userId)
+        );
+    }
+    @GetMapping("/pnl")
+    public PnlSummaryDTO getPnl(@RequestParam Long userId) {
+        return portfolioService.getPnlSummary(userId);
+    }
+    @GetMapping("/export")
+    public String exportCsv(@RequestParam Long userId) {
+        return portfolioService.generateCsv(userId);
+    }
+    @GetMapping("/tax-hint")
+    public ResponseEntity<String> getTaxHint(@RequestParam Long userId) {
+        return ResponseEntity.ok(
+                portfolioService.getTaxHint(userId)
         );
     }
 }

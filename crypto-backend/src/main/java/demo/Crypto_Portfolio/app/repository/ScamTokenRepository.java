@@ -1,11 +1,9 @@
 package demo.Crypto_Portfolio.app.repository;
 
-import demo.Crypto_Portfolio.app.model.ScamToken;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.Optional;
+import demo.Crypto_Portfolio.app.model.ScamToken;
 
 public interface ScamTokenRepository extends JpaRepository<ScamToken, Long> {
 
-    Optional<ScamToken> findByContractAddress(String contractAddress);
-
+    boolean existsByContractAddress(String contractAddress);
 }

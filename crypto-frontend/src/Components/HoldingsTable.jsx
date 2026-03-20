@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
-const HoldingsTable = ({ holdings }) => {
+const HoldingsTable = ({ holdings, alerts = [] }) => {
+
+  const [expandedIndex, setExpandedIndex] = useState(null);
 
   if (!holdings || holdings.length === 0) {
     return (
@@ -11,8 +13,62 @@ const HoldingsTable = ({ holdings }) => {
     );
   }
 
-  return (
+  const getStatus = (holding) => {
+    const assetAlerts = alerts.filter(
+      (a) => a.assetSymbol === holding.assetSymbol
+    );
 
+    const scamAlert = assetAlerts.find(
+      (a) => a.severity === "CRITICAL"
+    );
+
+    if (scamAlert) {
+      return {
+        label: "SCAM",
+        type: "scam",
+        reason: scamAlert.message,
+        suggestion: "Avoid completely 🚫"
+      };
+    }
+
+    const risk = holding.riskLevel?.toLowerCase();
+
+    if (risk === "high") {
+      return {
+        label: "HIGH",
+        type: "high",
+        reason: "High volatility or concentration",
+        suggestion: "Reduce exposure"
+      };
+    }
+
+    if (risk === "medium") {
+      return {
+        label: "MEDIUM",
+        type: "medium",
+        reason: "Moderate risk",
+        suggestion: "Monitor closely"
+      };
+    }
+
+    if (risk === "low") {
+      return {
+        label: "LOW",
+        type: "low",
+        reason: "Stable asset",
+        suggestion: "Safe to hold"
+      };
+    }
+
+    return {
+      label: "NOT CHECKED",
+      type: "unknown",
+      reason: "No data available",
+      suggestion: "-"
+    };
+  };
+
+  return (
     <div className="portfolio-section">
 
       <h3>Holdings</h3>
@@ -22,12 +78,12 @@ const HoldingsTable = ({ holdings }) => {
         <thead>
           <tr>
             <th>Asset</th>
-            <th>Risk</th>
+            <th>Risk & Scam</th>
             <th>Quantity</th>
-            <th>Avg Cost</th>
-            <th>Live Price</th>
-            <th>Current Value</th>
-            <th>Unrealized PnL</th>
+            <th className="text-right">Average Cost</th>
+            <th className="text-right">Live Price</th>
+            <th className="text-right">Current Value</th>
+            <th className="text-right">Profit & Loss</th>
           </tr>
         </thead>
 
@@ -35,61 +91,87 @@ const HoldingsTable = ({ holdings }) => {
 
           {holdings.map((holding, index) => {
 
-            const riskLevel = holding.riskLevel || "LOW";
+            const pnl = Number(holding.pnl ?? holding.unrealizedPnl ?? 0);
+            const status = getStatus(holding);
+
+            const isOpen = expandedIndex === index;
 
             return (
+              <React.Fragment key={index}>
 
-              <tr key={index}>
+                {/* MAIN ROW */}
+                <tr
+                  onClick={() =>
+                    setExpandedIndex(isOpen ? null : index)
+                  }
+                  style={{ cursor: "pointer" }}
+                >
 
-                {/* Asset */}
-                <td className="asset-name">
-                  {holding.assetSymbol}
-                </td>
+                  <td>{holding.assetSymbol}</td>
 
-                {/* Risk */}
-                <td>
                   <td>
-                    {riskLevel === "CRITICAL" ? (
-                      <span className="risk-badge critical">
-                        🚨 SCAM
-                      </span>
-                    ) : (
-                      <span className={`risk-badge ${riskLevel.toLowerCase()}`}>
-                        {riskLevel}
-                      </span>
-                    )}
+                    <span className={`badge ${status.type}`}>
+                      {status.label}
+                    </span>
                   </td>
-                </td>
 
-                {/* Quantity */}
-                <td>
-                  {Number(holding.quantity).toLocaleString()}
-                </td>
+                  <td>
+                    {Number(holding.quantity).toLocaleString()}
+                  </td>
 
-                {/* Avg Cost */}
-                <td>
-                  ${Number(holding.avgCost).toLocaleString()}
-                </td>
+                  <td className="text-right">
+                    ${Number(holding.avgCost).toLocaleString()}
+                  </td>
 
-                {/* Live Price */}
-                <td>
-                  ${Number(holding.livePrice).toLocaleString()}
-                </td>
+                  <td className="text-right">
+                    ${Number(holding.livePrice).toLocaleString()}
+                  </td>
 
-                {/* Current Value */}
-                <td>
-                  ${Number(holding.currentValue).toLocaleString()}
-                </td>
+                  <td className="text-right">
+                    ${Number(holding.currentValue).toLocaleString()}
+                  </td>
 
-                {/* PnL */}
-                <td className={holding.unrealizedPnl >= 0 ? "green" : "red"}>
-                  ${Number(holding.unrealizedPnl).toLocaleString()}
-                </td>
+                  <td
+                    className={
+                      pnl >= 0
+                        ? "pnl-positive text-right"
+                        : "pnl-negative text-right"
+                    }
+                  >
+                    ${pnl.toLocaleString()}
+                  </td>
 
-              </tr>
+                </tr>
 
+                {/* 🔥 EXPANDED ROW */}
+                {isOpen && (
+                  <tr className="expanded-row">
+                    <td colSpan="7">
+
+                      <div className="expanded-content">
+
+                        <div className="expanded-header">
+                          <span className={`badge ${status.type}`}>
+                            {status.label}
+                          </span>
+                        </div>
+
+                        <p>
+                          <strong>Reason:</strong> {status.reason}
+                        </p>
+
+                        <p className="suggestion">
+                          <strong>Suggestion:</strong> {status.suggestion}
+                        </p>
+
+                      </div>
+
+                    </td>
+                  </tr>
+                )}
+
+              </React.Fragment>
             );
-
           })}
 
         </tbody>
@@ -97,9 +179,7 @@ const HoldingsTable = ({ holdings }) => {
       </table>
 
     </div>
-
   );
-
 };
 
 export default HoldingsTable;
