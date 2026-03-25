@@ -1,8 +1,12 @@
 package demo.Crypto_Portfolio.app.controller;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import demo.Crypto_Portfolio.app.service.PortfolioService;
 import demo.Crypto_Portfolio.app.model.*;
@@ -80,16 +84,28 @@ public class PortfolioController {
     }
     @GetMapping("/pnl")
     public PnlSummaryDTO getPnl(@RequestParam Long userId) {
+
         return portfolioService.getPnlSummary(userId);
     }
     @GetMapping("/export")
-    public String exportCsv(@RequestParam Long userId) {
-        return portfolioService.generateCsv(userId);
+    public ResponseEntity<byte[]> downloadHoldingsCsv(@RequestParam Long userId) {
+
+        String csv = portfolioService.generateCsv(userId);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=holdings.csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(csv.getBytes());
     }
-    @GetMapping("/tax-hint")
-    public ResponseEntity<String> getTaxHint(@RequestParam Long userId) {
-        return ResponseEntity.ok(
-                portfolioService.getTaxHint(userId)
-        );
+    @GetMapping("/tax-report")
+    public ResponseEntity<byte[]> downloadTaxReport(@RequestParam Long userId) {
+
+        String csv = portfolioService.generateTaxReportCsv(userId);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=tax_report.csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(csv.getBytes());
     }
+
 }

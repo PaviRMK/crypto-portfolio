@@ -120,15 +120,15 @@ const HoldingsTable = ({ holdings, alerts = [] }) => {
                   </td>
 
                   <td className="text-right">
-                    ${Number(holding.avgCost).toLocaleString()}
+                    ${Number(holding.avgCost).toFixed(2)}
                   </td>
 
                   <td className="text-right">
-                    ${Number(holding.livePrice).toLocaleString()}
+                    ${Number(holding.livePrice).toFixed(2)}
                   </td>
 
                   <td className="text-right">
-                    ${Number(holding.currentValue).toLocaleString()}
+                    ${Number(holding.currentValue).toFixed(2)}
                   </td>
 
                   <td
@@ -138,7 +138,7 @@ const HoldingsTable = ({ holdings, alerts = [] }) => {
                         : "pnl-negative text-right"
                     }
                   >
-                    ${pnl.toLocaleString()}
+                    ${Number(pnl).toFixed(2)}
                   </td>
 
                 </tr>

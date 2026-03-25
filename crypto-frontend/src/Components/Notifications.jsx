@@ -35,8 +35,12 @@ const Notifications = ({ notifications, onClose }) => {
 
   const grouped = groupAlerts(visibleAlerts);
 
-  const handleDismiss = (index) => {
-    setVisibleAlerts(prev => prev.filter((_, i) => i !== index));
+  const handleDismiss = (alertToDismiss) => {
+    setVisibleAlerts((prev) => {
+      const idx = prev.indexOf(alertToDismiss);
+      if (idx === -1) return prev;
+      return prev.filter((_, i) => i !== idx);
+    });
   };
 
   return (
@@ -87,8 +91,7 @@ const Notifications = ({ notifications, onClose }) => {
 
                 {/* ACTIONS */}
                 <div className="notif-actions">
-                  <button>View</button>
-                  <button onClick={() => handleDismiss(index)}>
+                  <button onClick={() => handleDismiss(alert)}>
                     Dismiss
                   </button>
                 </div>

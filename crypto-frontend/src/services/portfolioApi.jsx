@@ -103,13 +103,23 @@ TAX HINT
 
 export const getTaxHint = async (userId) => {
   return safeRequest(
-    async () => {
-      const res = await API.get("/portfolio/tax-hint", {
+    () =>
+      API.get("/portfolio/tax-hint", {
         params: { userId }
-      });
-      console.log("TAX API RESPONSE:", res);
-      return res;
-    },
+      }),
     ""
   );
+};
+
+// ==========================
+// TAX REPORT
+// ==========================
+
+export const downloadTaxReport = async (userId) => {
+  const response = await API.get("/portfolio/tax-report", {
+    params: { userId },
+    responseType: "blob"
+  });
+
+  return response.data;
 };
