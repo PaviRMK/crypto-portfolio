@@ -1,58 +1,74 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/components/notifications.css";
 
-const getTimeAgo = () => {
-  return "Just now"; // you can enhance later
-};
+const getTimeAgo = () => "Just now";
 
-const getIcon = (type) => {
-  if (type === "scam") return "🚨";
-  if (type === "risk") return "⚠";
+const getIcon = (severity) => {
+  if (severity === "CRITICAL") return "🚨";
+  if (severity === "HIGH") return "⚠️";
   return "📉";
 };
 
-const getBorderColor = (type) => {
-  if (type === "scam") return "red";
-  if (type === "risk") return "yellow";
-  return "orange";
+const getBorderColor = (severity) => {
+  if (severity === "CRITICAL") return "red";
+  if (severity === "HIGH") return "orange";
+  return "yellow";
 };
 
-const groupAlerts = (notifications) => {
+const formatMessage = (message, assetSymbol) => {
+  if (!message) return "";
+
+  let msg = String(message).trim();
+  const symbol = (assetSymbol || "").trim();
+
+  msg = msg.replace(/^[^A-Za-z0-9]+/, "").trim();
+
+  if (symbol) {
+    msg = msg.replace(`in ${symbol}`, "").trim();
+  }
+
+  return msg;
+};
+
+const groupAlerts = (alerts) => {
   const grouped = {};
-
-  notifications.forEach((n) => {
-    const key = n.asset || "Market";
+  alerts.forEach((a) => {
+    const key = a.assetSymbol || "Market";
     if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(n);
+    grouped[key].push(a);
   });
-
   return grouped;
 };
 
-const Notifications = ({ notifications, onClose }) => {
+const Notifications = ({ notifications = [], onClose }) => {
 
-  const [visibleAlerts, setVisibleAlerts] = useState(notifications);
+  const [visibleAlerts, setVisibleAlerts] = useState([]);
+
+  // 🔥 THIS IS THE FIX
+  useEffect(() => {
+    setVisibleAlerts(notifications);
+  }, [notifications]);
 
   const grouped = groupAlerts(visibleAlerts);
 
   const handleDismiss = (alertToDismiss) => {
-    setVisibleAlerts((prev) => {
-      const idx = prev.indexOf(alertToDismiss);
-      if (idx === -1) return prev;
-      return prev.filter((_, i) => i !== idx);
-    });
+    setVisibleAlerts((prev) =>
+      prev.filter((a) => a !== alertToDismiss)
+    );
   };
 
   return (
     <div className="notification-panel">
 
-      {/* HEADER */}
       <div className="notification-header">
         <h3>🔔 Risk & Market Alerts</h3>
         <button onClick={onClose}>✖</button>
       </div>
 
-      {/* GROUPED ALERTS */}
+      {visibleAlerts.length === 0 && (
+        <p className="empty-text">No alerts available</p>
+      )}
+
       {Object.keys(grouped).map((group, gIndex) => (
         <div key={gIndex} className="notification-group">
 
@@ -62,34 +78,42 @@ const Notifications = ({ notifications, onClose }) => {
 
           {grouped[group].map((alert, index) => {
 
-            const type =
-              alert.type ||
-              (alert.message?.includes("Scam") ? "scam" :
-               alert.message?.includes("High") ? "risk" : "price");
+            const cleanMsg = formatMessage(
+              alert.message,
+              alert.assetSymbol
+            );
+
+            const severity = (alert.severity || "")
+              .toString()
+              .toUpperCase();
 
             return (
               <div
                 key={index}
-                className={`notification-item unread`}
+                className="notification-item unread"
                 style={{
-                  borderLeft: `4px solid ${getBorderColor(type)}`
+                  borderLeft: `4px solid ${getBorderColor(severity)}`
                 }}
               >
 
                 <div className="notif-content">
 
                   <span className="notif-icon">
-                    {getIcon(type)}
+                    {getIcon(severity)}
                   </span>
 
                   <div className="notif-text">
-                    <p>{alert.message}</p>
+
+                    <p>
+                      <strong>{alert.assetSymbol || "Market"}</strong> → {cleanMsg}
+                      {severity && ` (${severity})`}
+                    </p>
+
                     <span>{getTimeAgo()}</span>
                   </div>
 
                 </div>
 
-                {/* ACTIONS */}
                 <div className="notif-actions">
                   <button onClick={() => handleDismiss(alert)}>
                     Dismiss

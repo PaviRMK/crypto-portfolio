@@ -95,22 +95,6 @@ export const exportPortfolio = async (userId) => {
   return response.data;
 };
 
-/*
-==========================
-TAX HINT
-==========================
-*/
-
-export const getTaxHint = async (userId) => {
-  return safeRequest(
-    () =>
-      API.get("/portfolio/tax-hint", {
-        params: { userId }
-      }),
-    ""
-  );
-};
-
 // ==========================
 // TAX REPORT
 // ==========================

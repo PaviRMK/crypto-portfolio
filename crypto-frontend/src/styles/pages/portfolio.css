@@ -57,10 +57,18 @@
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.05);
   transition: 0.3s;
+  position: relative;
 }
 
 .pnl-card:hover {
   transform: translateY(-3px);
+}
+
+.pnl-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
 }
 
 .pnl-label {
@@ -74,13 +82,15 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  margin-left: 4px;
+  cursor: pointer;
 }
 
 .info-icon {
   font-size: 12px;
   line-height: 1;
   color: #e2e8f0;
-  cursor: default;
+  cursor: pointer;
   user-select: none;
 }
 
@@ -100,6 +110,7 @@
   visibility: hidden;
   pointer-events: none;
   z-index: 30;
+  cursor: pointer;
 }
 
 .tooltip-wrap:hover .tooltip {

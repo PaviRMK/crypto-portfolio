@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -9,12 +9,33 @@ import PortfolioPage from "./pages/PortfolioPage";
 import TradePage from "./pages/TradePage";
 
 import Navbar from "./Components/Navbar";
+import { getRiskAlerts } from "./services/portfolioApi";
 
 function App() {
 
+  const [alerts, setAlerts] = useState([]);
+
+  const userId = localStorage.getItem("userId") || 1;
+
+  // 🔥 FETCH ONCE (MAIN FIX)
+  useEffect(() => {
+    const loadAlerts = async () => {
+      try {
+        const data = await getRiskAlerts(userId);
+        console.log("APP ALERTS:", data); // DEBUG
+        setAlerts(data || []);
+      } catch (err) {
+        console.error("App Alerts Error:", err);
+      }
+    };
+
+    loadAlerts();
+  }, [userId]);
+
   const Layout = ({ children }) => (
     <>
-      <Navbar />
+      {/* ✅ PASS ALERTS HERE */}
+      <Navbar alerts={alerts} />
       {children}
     </>
   );
@@ -24,7 +45,6 @@ function App() {
 
       <Routes>
 
-        {/* Redirect root to login */}
         <Route path="/" element={<Navigate to="/login" />} />
 
         <Route path="/login" element={<Login />} />
@@ -52,16 +72,21 @@ function App() {
           path="/portfolio"
           element={
             <Layout>
-              <PortfolioPage />
+              {/* ✅ PASS HERE ALSO (optional but good) */}
+              <PortfolioPage alerts={alerts} />
             </Layout>
           }
         />
-        <Route path="/trade" element={
-          <>
-            <Navbar />
-            <TradePage />
-          </>
-        } />
+
+        <Route
+          path="/trade"
+          element={
+            <>
+              <Navbar alerts={alerts} />
+              <TradePage />
+            </>
+          }
+        />
 
       </Routes>
 

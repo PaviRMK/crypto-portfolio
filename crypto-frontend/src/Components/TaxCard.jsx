@@ -18,14 +18,31 @@ const TaxCard = ({
   onTogglePreview
 }) => {
 
-  // Format numeric values to 2 decimal places
-  const formatNumericDisplay = (value) => {
-    if (value === null || value === undefined || value === "-") return value;
-    const num = parseFloat(value);
-    return isNaN(num) ? value : num.toFixed(2);
+  /* ================= FORMAT CELL ================= */
+
+  const formatCell = (value) => {
+    if (value === null || value === undefined || value === "") return "-";
+
+    // ✅ Handle date formats FIRST
+    if (typeof value === "string") {
+      if (value.includes("T")) {
+        return value.split("T")[0];
+      }
+      if (/^\d{4}-\d{2}-\d{2}/.test(value)) {
+        return value.split(" ")[0];
+      }
+    }
+
+    // ✅ Format only numbers
+    if (!isNaN(value) && value !== "") {
+      return Number(value).toFixed(2);
+    }
+
+    return value;
   };
 
-  // show nothing only if completely missing
+  /* ================= VALIDATION ================= */
+
   if (taxHint === null || taxHint === undefined) return null;
 
   const hasPreviewData =
@@ -41,29 +58,35 @@ const TaxCard = ({
       ? "tax-status tax-status-loss"
       : "tax-status tax-status-neutral";
 
+  /* ================= UI ================= */
+
   return (
     <div className="tax-card">
 
+      {/* HEADER */}
       <div className="tax-header">
-        ⚠️ Tax Information
+        ⚠️ Tax-Ready Information
       </div>
 
-      <p className="tax-message">
-        {taxHint}
-      </p>
+      {/* MESSAGE */}
+      <p className="tax-message">{taxHint}</p>
 
+      {/* META */}
       <div className="tax-meta-grid">
         <div className="tax-meta-item">
           <span className="tax-meta-label">Realized Profit:</span>
           <span className="tax-meta-value">{realizedProfit}</span>
         </div>
+
         <div className="tax-meta-item">
           <span className="tax-meta-label">Status:</span>
           <span className={statusClass}>{status}</span>
         </div>
       </div>
 
+      {/* ACTIONS */}
       <div className="tax-actions">
+
         <button
           className="tax-preview-btn"
           onClick={showPreview ? onTogglePreview : onPreview}
@@ -74,7 +97,7 @@ const TaxCard = ({
             ? "Loading Preview..."
             : showPreview
             ? "Hide Preview"
-            : "Preview Tax Report"}
+            : "Preview Tax-Ready Report"}
         </button>
 
         <button
@@ -83,64 +106,139 @@ const TaxCard = ({
           disabled={downloading}
           type="button"
         >
-          {downloading ? "Downloading..." : "Download Tax Report"}
+          {downloading
+            ? "Downloading..."
+            : "Download Tax-Ready Report"}
         </button>
+
       </div>
 
+      {/* ERROR */}
       {previewError && (
         <p className="tax-error">{previewError}</p>
       )}
 
+      {/* ================= PREVIEW ================= */}
       {showPreview && hasPreviewData && (
         <div className="tax-preview">
-          <h4 className="tax-preview-title">Tax Report Preview</h4>
+
+          <h4 className="tax-preview-title">
+            Tax-Ready Report Preview
+          </h4>
+
           <div className="tax-preview-table-wrap">
+
             <table className="tax-preview-table">
+
+              {/* HEADER */}
               <thead>
                 <tr>
                   {previewHeaders.map((header, idx) => (
-                    <th key={`tax-header-${idx}`}>{header}</th>
+                    <th key={idx}>{header}</th>
                   ))}
                 </tr>
               </thead>
+
+              {/* BODY */}
               <tbody>
                 {previewRows.map((row, rowIdx) => (
-                  <tr key={`tax-row-${rowIdx}`}>
-                    {previewHeaders.map((_, colIdx) => (
-                      <td key={`tax-cell-${rowIdx}-${colIdx}`}>
-                        {formatNumericDisplay(row[colIdx] || "-")}
-                      </td>
-                    ))}
+                  <tr key={rowIdx}>
+
+                    {previewHeaders.map((header, colIdx) => {
+                      const value = row[colIdx];
+                      const normalizedHeader =
+                        header?.toLowerCase().trim();
+
+                      // 🔥 TAX EVENT BADGE
+                      if (normalizedHeader === "tax event") {
+                        return (
+                          <td key={colIdx}>
+                            <span className="badge tax-event">
+                              {value}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // 🔥 HOLDING TYPE BADGE
+                      if (normalizedHeader === "holding type") {
+                        return (
+                          <td key={colIdx}>
+                            <span
+                              className={
+                                value === "Long-Term"
+                                  ? "badge holding-long"
+                                  : value === "Unknown"
+                                  ? "badge holding-neutral"
+                                  : "badge holding-short"
+                              }
+                            >
+                              {value}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // ✅ FIX: prevent string cutting (symbol, category, text fields)
+                      if (
+                        normalizedHeader === "symbol" ||
+                        normalizedHeader === "category" ||
+                        normalizedHeader === "tax insight"
+                      ) {
+                        return (
+                          <td key={colIdx}>
+                            {String(value).trim()}
+                          </td>
+                        );
+                      }
+
+                      return (
+                        <td key={colIdx}>
+                          {formatCell(value)}
+                        </td>
+                      );
+                    })}
+
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
 
+          {/* SUMMARY */}
           {Array.isArray(summaryRows) && summaryRows.length > 0 && (
             <div className="tax-summary-grid">
+
               {summaryRows.map((summary, idx) => {
-                const summaryLabel = (summary.label || "").toUpperCase();
+
+                const label = (summary.label || "").toUpperCase();
+
                 const summaryClass =
-                  summaryLabel.includes("LOSS")
+                  label.includes("LOSS")
                     ? "tax-summary-item tax-summary-loss"
-                    : summaryLabel.includes("PROFIT") ||
-                      summaryLabel.includes("NET RESULT")
+                    : label.includes("PROFIT") ||
+                      label.includes("NET")
                     ? "tax-summary-item tax-summary-profit"
                     : "tax-summary-item";
 
                 return (
-                  <div className={summaryClass} key={`tax-summary-${idx}`}>
+                  <div className={summaryClass} key={idx}>
                     <span>{summary.label}</span>
-                    <strong>{formatNumericDisplay(summary.value)}</strong>
+                    <strong>
+                      {formatCell(summary.value)}
+                    </strong>
                   </div>
                 );
               })}
+
             </div>
           )}
+
         </div>
       )}
 
+      {/* FINAL ERROR */}
       {error && (
         <p className="tax-error">{error}</p>
       )}
