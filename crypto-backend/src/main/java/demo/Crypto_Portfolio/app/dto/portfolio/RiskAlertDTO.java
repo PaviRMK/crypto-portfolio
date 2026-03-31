@@ -14,6 +14,7 @@ public class RiskAlertDTO {
         this.severity = severity;
     }
 
+
     public String getAssetSymbol() {
         return assetSymbol;
     }

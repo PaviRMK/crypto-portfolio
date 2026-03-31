@@ -1,45 +1,68 @@
 package demo.Crypto_Portfolio.app.service;
 
+// DTOs
 import demo.Crypto_Portfolio.app.dto.portfolio.HoldingLiveDTO;
 import demo.Crypto_Portfolio.app.dto.portfolio.PortfolioSummaryDTO;
 import demo.Crypto_Portfolio.app.dto.portfolio.RiskAlertDTO;
+import demo.Crypto_Portfolio.app.dto.portfolio.PnlSummaryDTO;
+
+// Models
 import demo.Crypto_Portfolio.app.model.Holding;
 import demo.Crypto_Portfolio.app.model.PriceSnapshot;
 import demo.Crypto_Portfolio.app.model.Trade;
+
+// Repositories
 import demo.Crypto_Portfolio.app.repository.HoldingRepository;
 import demo.Crypto_Portfolio.app.repository.PriceSnapshotRepository;
 import demo.Crypto_Portfolio.app.repository.TradeRepository;
+import demo.Crypto_Portfolio.app.repository.RiskAlertRepository;
 
+// Services
+import demo.Crypto_Portfolio.app.service.CryptoService;
+import demo.Crypto_Portfolio.app.service.ScamService;
+
+// Spring
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+// Java Utils
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
+import java.time.Duration;
+import java.util.Optional;
+
+
 
 @Service
 public class PortfolioService {
 
     private final HoldingRepository holdingRepository;
     private final TradeRepository tradeRepository;
-    private final ScamService scamService;
     private final PriceSnapshotRepository snapshotRepository;
     private final CryptoService cryptoService;
+    private final ScamService scamService;
+    private final RiskAlertRepository riskAlertRepository;
 
     public PortfolioService(
             HoldingRepository holdingRepository,
             TradeRepository tradeRepository,
-            ScamService scamService,
             PriceSnapshotRepository snapshotRepository,
-            CryptoService cryptoService){
+            CryptoService cryptoService,
+            ScamService scamService,
+            RiskAlertRepository riskAlertRepository) {
 
         this.holdingRepository = holdingRepository;
         this.tradeRepository = tradeRepository;
-        this.scamService = scamService;
         this.snapshotRepository = snapshotRepository;
-        this.cryptoService=cryptoService;
+        this.cryptoService = cryptoService;
+        this.scamService = scamService;
+        this.riskAlertRepository = riskAlertRepository;
     }
 
     // =============================
-    // BASIC HOLDINGS
+    // HOLDINGS
     // =============================
 
     public List<Holding> getHoldings(Long userId) {
@@ -47,7 +70,7 @@ public class PortfolioService {
     }
 
     // =============================
-    // HOLDINGS WITH LIVE PRICE
+    // HOLDINGS WITH LIVE DATA
     // =============================
 
     public List<HoldingLiveDTO> getHoldingsWithLive(Long userId) {
@@ -68,6 +91,22 @@ public class PortfolioService {
 
             String riskLevel = calculateHoldingRisk(pnl, invested);
 
+            // Scam detection
+            boolean isScam = false;
+            String scamReason = null;
+
+            if (h.getContractAddress() != null && !h.getContractAddress().isEmpty()) {
+                isScam = scamService.isScamToken(h.getContractAddress());
+                if (isScam) {
+                    scamReason = "Token flagged as scam";
+                }
+            }
+
+            String riskReason =
+                    pnl < 0 ? "Negative returns" :
+                            pnl == 0 ? "No profit no loss" :
+                                    "Profitable asset";
+
             return new HoldingLiveDTO(
                     h.getAssetSymbol(),
                     quantity,
@@ -75,7 +114,10 @@ public class PortfolioService {
                     livePrice,
                     currentValue,
                     pnl,
-                    riskLevel
+                    riskLevel,
+                    isScam,
+                    scamReason,
+                    riskReason
             );
 
         }).toList();
@@ -86,6 +128,9 @@ public class PortfolioService {
     // =============================
 
     public PortfolioSummaryDTO getPortfolioSummary(Long userId) {
+
+        double realized = calculateRealizedPnl(userId);
+        double unrealized = calculateUnrealizedPnl(userId);
 
         List<Holding> holdings = holdingRepository.findByUserId(userId);
 
@@ -99,17 +144,14 @@ public class PortfolioService {
                     .map(PriceSnapshot::getPrice)
                     .orElse(0.0);
 
-            double investment = h.getQuantity() * h.getAvgCost();
-            totalInvestment += investment;
-
+            totalInvestment += h.getQuantity() * h.getAvgCost();
             totalValue += h.getQuantity() * livePrice;
         }
 
         PortfolioSummaryDTO dto = new PortfolioSummaryDTO();
-
         dto.setTotalInvestment(totalInvestment);
         dto.setTotalValue(totalValue);
-        dto.setTotalPnl(totalValue - totalInvestment);
+        dto.setTotalPnl(realized + unrealized);
 
         return dto;
     }
@@ -122,23 +164,18 @@ public class PortfolioService {
         return tradeRepository.findByUserId(userId);
     }
 
-    // =============================
-    // SAVE TRADE
-    // =============================
-
     public Trade saveTrade(Long userId, Trade trade) {
 
         trade.setUserId(userId);
+        Trade saved = tradeRepository.save(trade);
 
-        Trade savedTrade = tradeRepository.save(trade);
+        updateHoldingFromTrade(saved);
 
-        updateHoldingFromTrade(savedTrade);
-
-        return savedTrade;
+        return saved;
     }
 
     // =============================
-    // UPDATE HOLDING FROM TRADE
+    // UPDATE HOLDING
     // =============================
 
     private void updateHoldingFromTrade(Trade trade) {
@@ -151,6 +188,11 @@ public class PortfolioService {
 
         holding.setUserId(trade.getUserId());
         holding.setAssetSymbol(symbol);
+
+        // Safe contract address
+        if (trade.getContractAddress() != null) {
+            holding.setContractAddress(trade.getContractAddress());
+        }
 
         double currentQty = holding.getQuantity();
 
@@ -182,9 +224,155 @@ public class PortfolioService {
     }
 
     // =============================
-    // RISK LEVEL
+    // RISK ALERTS
     // =============================
 
+    public List<RiskAlertDTO> getRiskAlerts(Long userId) {
+
+        List<Holding> holdings = holdingRepository.findByUserId(userId);
+        List<RiskAlertDTO> alerts = new ArrayList<>();
+
+        // Total portfolio value (based on investment)
+        double totalValue = holdings.stream()
+                .mapToDouble(h -> h.getQuantity() * h.getAvgCost())
+                .sum();
+
+        for (Holding h : holdings) {
+
+            String symbol = h.getAssetSymbol();
+
+            double invested = h.getQuantity() * h.getAvgCost();
+            double exposure = totalValue == 0 ? 0 : invested / totalValue;
+
+            // 🔶 1. High Concentration Alert
+            if (exposure > 0.5) {
+                alerts.add(new RiskAlertDTO(
+                        symbol,
+                        "⚠️ High concentration in " + symbol,
+                        "HIGH"
+                ));
+            }
+
+            // 🔶 2. Price Drop Alert (FIXED LOGIC)
+            double livePrice = snapshotRepository
+                    .findTopByCoinSymbolOrderByTimestampDesc(symbol)
+                    .map(PriceSnapshot::getPrice)
+                    .orElse(0.0);
+
+            double currentValue = h.getQuantity() * livePrice;
+
+            double pnlPercent = ((currentValue - invested) / (invested == 0 ? 1 : invested)) * 100;
+
+            if (pnlPercent < -5) {
+                alerts.add(new RiskAlertDTO(
+                        symbol,
+                        "📉 " + symbol + " dropped significantly",
+                        "MEDIUM"
+                ));
+            }
+
+            // 🔶 3. Scam Detection
+            if (h.getContractAddress() != null && !h.getContractAddress().isEmpty()) {
+
+                boolean scam = scamService.isScamToken(h.getContractAddress());
+
+                if (scam) {
+                    alerts.add(new RiskAlertDTO(
+                            symbol,
+                            "🚨 Scam token detected",
+                            "CRITICAL"
+                    ));
+                }
+            }
+
+        }
+
+        return alerts;
+    }
+    // =============================
+    // PnL METHODS
+    // =============================
+
+    public double calculateRealizedPnl(Long userId) {
+
+        List<Trade> trades = tradeRepository.findByUserId(userId);
+
+        double realized = 0;
+
+        for (Trade t : trades) {
+
+            if ("SELL".equalsIgnoreCase(t.getSide())) {
+
+                Optional<Trade> buyTrade = tradeRepository
+                        .findTopByUserIdAndSymbolAndSideAndExecutedAtBeforeOrderByExecutedAtDesc(
+                                userId, t.getSymbol(), "BUY", t.getExecutedAt());
+
+                double buyPrice = buyTrade.map(Trade::getPrice).orElse(0.0);
+
+                realized += (t.getPrice() - buyPrice) * t.getQuantity();
+            }
+        }
+
+        return realized;
+    }
+
+    public double calculateUnrealizedPnl(Long userId) {
+        return getHoldingsWithLive(userId).stream()
+                .mapToDouble(HoldingLiveDTO::getPnl)
+                .sum();
+    }
+
+    public PnlSummaryDTO getPnlSummary(Long userId) {
+
+        double realized = calculateRealizedPnl(userId);
+        double unrealized = calculateUnrealizedPnl(userId);
+
+        PnlSummaryDTO dto = new PnlSummaryDTO();
+        dto.setRealizedPnl(realized);
+        dto.setUnrealizedPnl(unrealized);
+        dto.setTotalPnl(realized + unrealized);
+
+        return dto;
+    }
+
+    // =============================
+    // CSV EXPORT
+    // =============================
+
+    public String generateCsv(Long userId) {
+
+        List<HoldingLiveDTO> holdings = getHoldingsWithLive(userId);
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("Asset,Quantity,Average Cost,Live Price,CurrentValue,Profit & Loss\n");
+
+        for (HoldingLiveDTO h : holdings) {
+            csv.append(h.getAssetSymbol()).append(",")
+                    .append(h.getQuantity()).append(",")
+                    .append(h.getAvgCost()).append(",")
+                    .append(h.getLivePrice()).append(",")
+                    .append(h.getCurrentValue()).append(",")
+                    .append(h.getPnl()).append("\n");
+        }
+
+        return csv.toString();
+    }
+
+    // =============================
+    // HELPER
+    // =============================
+
+    private String calculateHoldingRisk(double pnl, double investment) {
+
+        if (investment == 0) return "LOW";
+
+        double percent = (pnl / investment) * 100;
+
+        if (percent <= -5) return "HIGH";
+        else if (percent < 0) return "MEDIUM";
+        else return "LOW";
+    }
+    // risk calculation
     public String calculateRiskLevel(Long userId) {
 
         List<Holding> holdings = holdingRepository.findByUserId(userId);
@@ -207,82 +395,93 @@ public class PortfolioService {
 
         return "Balanced Portfolio";
     }
-
     // =============================
-    // RISK ALERTS
+    // TAX CSV EXPORT (NEW)
     // =============================
 
-    public List<RiskAlertDTO> getRiskAlerts(Long userId) {
 
-        List<Holding> holdings = holdingRepository.findByUserId(userId);
-        List<RiskAlertDTO> alerts = new ArrayList<>();
+    public String generateTaxReportCsv(Long userId) {
 
-        if (holdings.isEmpty()) {
-            return alerts;
+        List<Trade> trades = tradeRepository.findByUserIdOrderByExecutedAtDesc(userId);
+
+        StringBuilder csv = new StringBuilder();
+
+        // HEADER
+        csv.append("Date,Symbol,Type,Quantity,Buy Price,Sell Price,Profit/Loss,Category,Tax Insight,Holding Type\n");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        for (Trade t : trades) {
+
+            if ("SELL".equalsIgnoreCase(t.getSide())) {
+
+                // Fetch BUY trade
+                Optional<Trade> buyTrade = tradeRepository
+                        .findTopByUserIdAndSymbolAndSideAndExecutedAtBeforeOrderByExecutedAtDesc(
+                                userId,
+                                t.getSymbol(),
+                                "BUY",
+                                t.getExecutedAt()
+                        );
+
+                double buyPrice = 0.0;
+                long holdingDays = 0;
+
+                if (buyTrade.isPresent()) {
+                    buyPrice = buyTrade.get().getPrice();
+
+                    holdingDays = Duration.between(
+                            buyTrade.get().getExecutedAt(),
+                            t.getExecutedAt()
+                    ).toDays();
+                }
+
+                // Profit calculation (even if buy missing)
+                double profit = (t.getPrice() - buyPrice) * t.getQuantity();
+
+                // Category
+                String category;
+                if (profit > 0) {
+                    category = "PROFIT";
+                } else if (profit < 0) {
+                    category = "LOSS";
+                } else {
+                    category = "NO_GAIN";
+                }
+
+                // Tax Insight (safe logic)
+                String taxInsight;
+                if (!buyTrade.isPresent()) {
+                    taxInsight = "No buy data (estimation)";
+                } else if (profit > 0) {
+                    taxInsight = "May be taxable";
+                } else {
+                    taxInsight = "No tax (loss)";
+                }
+
+                // Holding Type
+                String holdingType;
+                if (!buyTrade.isPresent()) {
+                    holdingType = "Unknown";
+                } else {
+                    holdingType = holdingDays < 365 ? "Short-Term" : "Long-Term";
+                }
+
+                // Append row (IMPORTANT: always append)
+                csv.append(t.getExecutedAt().format(formatter)).append(",")
+                        .append(t.getSymbol()).append(",")
+                        .append(t.getSide()).append(",")
+                        .append(t.getQuantity()).append(",")
+                        .append(buyPrice).append(",")
+                        .append(t.getPrice()).append(",")
+                        .append(profit).append(",")
+                        .append("\"").append(category).append("\"").append(",")
+                        .append("\"").append(taxInsight).append("\"").append(",")
+                        .append("\"").append(holdingType).append("\"")
+                        .append("\n");
+            }
         }
 
-        // calculate total portfolio value
-        double totalValue = holdings.stream()
-                .mapToDouble(h -> h.getQuantity() * h.getAvgCost())
-                .sum();
-
-        for (Holding h : holdings) {
-
-            String symbol = h.getAssetSymbol();
-
-            double coinValue = h.getQuantity() * h.getAvgCost();
-            double exposure = totalValue == 0 ? 0 : coinValue / totalValue;
-
-            // 1️⃣ Portfolio concentration risk
-            if (exposure > 0.5) {
-
-                alerts.add(new RiskAlertDTO(
-                        symbol,
-                        "Portfolio heavily concentrated in " + symbol,
-                        "HIGH"
-                ));
-            }
-
-            // 2️⃣ Market volatility risk
-            double change = cryptoService.get24hChange(symbol);
-
-            if (Math.abs(change) > 10) {
-
-                alerts.add(new RiskAlertDTO(
-                        symbol,
-                        "High volatility detected (" + change + "%)",
-                        "MEDIUM"
-                ));
-            }
-
-            // 3️⃣ Scam detection
-            boolean scam = scamService.isScamToken(symbol);
-
-            if (scam) {
-
-                alerts.add(new RiskAlertDTO(
-                        symbol,
-                        "Token flagged in CryptoScamDB",
-                        "CRITICAL"
-                ));
-            }
-        }
-
-        return alerts;
-    }
-
-    // =============================
-    // HOLDING RISK
-    // =============================
-
-    private String calculateHoldingRisk(double pnl, double investment) {
-
-        if (investment == 0) return "LOW";
-
-        double pnlPercent = (pnl / investment) * 100;
-
-        if (pnlPercent <= -5) return "HIGH";
-        else if (pnlPercent < 0) return "MEDIUM";
-        else return "LOW";
+        return csv.toString();
     }
 }

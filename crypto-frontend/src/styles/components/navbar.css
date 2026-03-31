@@ -1,29 +1,110 @@
-.navbar{
- display:flex;
- justify-content:space-between;
- align-items:center;
- padding:15px 40px;
- background:#0f172a;
- border-bottom:1px solid #1e293b;
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
 }
 
-.logo{
- color:#22c55e;
- font-weight:600;
- font-size:18px;
+/* RIGHT SIDE ALIGNMENT */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 25px;
 }
 
-.nav-links{
- display:flex;
- gap:30px;
+.nav-links {
+  display: flex;
+  gap: 25px;
 }
 
-.nav-links a{
- text-decoration:none;
- color:#e2e8f0;
- font-weight:500;
+.nav-links a {
+  color: #e2e8f0;
+  text-decoration: none;
 }
 
-.nav-links a:hover{
- color:#22c55e;
+.nav-links a:hover {
+  color: #22c55e;
+}
+.logo {
+  color: #22c55e;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
+/* ================= NOTIFICATION ================= */
+
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-icon {
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.notification-icon:hover {
+  transform: scale(1.1);
+}
+
+/* badge */
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background: red;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+/* panel */
+
+.notification-panel {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 320px;
+
+  background: #0f172a;
+  border-radius: 14px;
+  padding: 16px;
+
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  z-index: 9999; 
+}
+
+/* alerts */
+
+.alert-item {
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.alert-item.critical {
+  background: rgba(239,68,68,0.2);
+  color: #f87171;
+}
+
+.alert-item.high {
+  background: rgba(250,204,21,0.2);
+  color: #facc15;
+}
+
+.alert-item.low {
+  background: rgba(59,130,246,0.2);
+  color: #93c5fd;
+}
+.navbar {
+  position: relative;
+  z-index: 1000; 
 }

@@ -16,9 +16,5 @@ export const getChartData = async (coinId, currency, days) => {
   const response = await API.get("/crypto/chart", {
     params: { coinId, currency, days }
   });
-    console.log("RAW API response:", response);         // 👈 full response
-  console.log("response.data:", response.data);       // 👈 data object
-  console.log("prices:", response.data?.prices);      // 👈 prices array
-
-  return response.data?.prices || response.data || [];
+  return response.data;
 };

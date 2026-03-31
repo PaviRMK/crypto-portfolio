@@ -34,10 +34,10 @@ const ExchangeTable = ({ exchanges = [] }) => {
               <td>{ex.exchangeName}</td>
               <td>{ex.pair}</td>
               <td>
-                ${ex.lastPrice ? ex.lastPrice.toLocaleString() : "-"}
+                ${ex.lastPrice ? Number(ex.lastPrice).toFixed(2) : "-"}
               </td>
               <td>
-                ${ex.volume ? ex.volume.toLocaleString() : "-"}
+                ${ex.volume ? Number(ex.volume).toFixed(2) : "-"}
               </td>
               <td>
                 <span className={`trust ${ex.trustScore?.toLowerCase()}`}>

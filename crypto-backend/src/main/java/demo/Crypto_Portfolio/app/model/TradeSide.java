@@ -4,3 +4,4 @@ public enum TradeSide {
     BUY,
     SELL
 }
+

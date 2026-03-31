@@ -41,9 +41,9 @@ const TradesTable = ({ trades }) => {
                 {trade.side}
               </td>
 
-              <td>${trade.price.toLocaleString()}</td>
+              <td>${Number(trade.price).toFixed(2)}</td>
 
-              <td>{trade.quantity}</td>
+              <td>{Number(trade.quantity).toFixed(2)}</td>
 
               <td>
                 {new Date(trade.executedAt).toLocaleString()}

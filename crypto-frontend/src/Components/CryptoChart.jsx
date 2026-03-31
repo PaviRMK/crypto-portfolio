@@ -5,13 +5,14 @@ import {
   LineElement,
   CategoryScale,
   LinearScale,
-  PointElement
+  PointElement,
+  Filler
 } from "chart.js";
 
 import "../styles/components/chart.css";
 
 
-ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement);
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Filler);
 
 const CryptoChart = ({ chartData }) => {
 

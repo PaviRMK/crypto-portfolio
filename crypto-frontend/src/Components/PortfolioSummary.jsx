@@ -18,7 +18,7 @@ const PortfolioSummary = ({ summary }) => {
       </div>
 
       <div className="summary-card">
-        <h4>Total PnL</h4>
+        <h4>Total Profit & Loss</h4>
         <p className={summary.totalPnl > 0 ? "green" : "red"}>
           ${Number(summary.totalPnl ?? 0).toFixed(2)}
         </p>

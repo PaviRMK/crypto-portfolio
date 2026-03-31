@@ -1,40 +1,85 @@
 package demo.Crypto_Portfolio.app.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
+
+import demo.Crypto_Portfolio.app.repository.ScamTokenRepository;
 
 @Service
 public class ScamService {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private RestTemplate restTemplate;
 
-    public boolean isScamToken(String contractAddress){
+    @Autowired
+    private ScamTokenRepository scamTokenRepository;
 
-        try{
+    // 🔥 GoPlus API
+    private static final String GOPLUS_API =
+            "https://api.gopluslabs.io/api/v1/token_security/1?contract_addresses=%s";
 
-            String url =
-                    "https://api.gopluslabs.io/api/v1/token_security/1?contract_addresses=" + contractAddress;
+    public boolean isScamToken(String contractAddress) {
 
-            JsonNode response =
-                    restTemplate.getForObject(url, JsonNode.class);
+        try {
 
-            JsonNode token =
-                    response.get("result").get(contractAddress);
+            // ✅ Safety check
+            if (contractAddress == null || contractAddress.isEmpty()) {
+                return false;
+            }
 
-            if(token == null) return false;
-
-            if(token.get("is_honeypot").asText().equals("1"))
+            // =============================
+            // 1️⃣ CHECK DB (ScamTokens Table)
+            // =============================
+            if (scamTokenRepository.existsByContractAddress(contractAddress)) {
+                System.out.println("⚠️ Scam detected from DB blacklist");
                 return true;
+            }
 
-            if(token.get("is_blacklisted").asText().equals("1"))
+            // =============================
+            // 2️⃣ CALL GOPLUS API
+            // =============================
+            String url = String.format(GOPLUS_API, contractAddress);
+
+            Map response = restTemplate.getForObject(url, Map.class);
+
+            if (response == null || response.get("result") == null) {
+                return false;
+            }
+
+            Map resultMap = (Map) response.get("result");
+
+            // 🔥 IMPORTANT FIX (lowercase)
+            Map result = (Map) resultMap.get(contractAddress.toLowerCase());
+
+            if (result == null) {
+                return false;
+            }
+
+            String isHoneyPot = (String) result.get("is_honeypot");
+            String isBlacklisted = (String) result.get("is_blacklisted");
+
+            // =============================
+            // 3️⃣ FINAL DECISION
+            // =============================
+            if ("1".equals(isHoneyPot) || "1".equals(isBlacklisted)) {
+
+                System.out.println("🚨 Scam detected via GoPlus API");
+
+                // OPTIONAL: Save to DB for future
+                // (only if you want caching)
+                // You can skip this if not needed
+
                 return true;
+            }
 
-        }catch(Exception e){
-            System.out.println("Scam API error: " + e.getMessage());
+            return false;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 }
