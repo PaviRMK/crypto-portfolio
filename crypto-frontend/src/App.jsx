@@ -10,6 +10,7 @@ import TradePage from "./pages/TradePage";
 
 import Navbar from "./Components/Navbar";
 import { getRiskAlerts } from "./services/portfolioApi";
+import CoinDetails from "./pages/CoinDetails";
 
 function App() {
 
@@ -58,7 +59,11 @@ function App() {
             </Layout>
           }
         />
-
+          <Route path="/coins/:coinId" element={
+              <Layout><
+                  CoinDetails />
+              </Layout>
+          } />
         <Route
           path="/exchange"
           element={

@@ -3,13 +3,13 @@ import {useNavigate, useParams} from 'react-router-dom';
 import { getChartData } from '../services/cryptoApi';
 import CryptoChart from '../Components/CryptoChart';
 import FilterBar from '../Components/FilterBar';
+import "../App.css";
 const CoinDetails=()=>
 {
     const navigate=useNavigate();
     const {coinId}=useParams();
     const[chartData,setChartData]=useState([]);
      const[days,setDays]=useState(1);
-     const [perPage, setPerPage] = useState(10);
      const[currency,setCurrency]=useState("usd");
      useEffect(()=>{
             const fetchChart=async()=>{
@@ -29,16 +29,18 @@ const CoinDetails=()=>
       <div className="filter-card">
         <FilterBar
           setCurrency={setCurrency}
-          setPerPage={setPerPage}
           setDays={setDays}
         />
       </div>
 
      <div className='chart-card'>
+         <div className="back-container">
+             <button className="back-btn" onClick={() => navigate(-1)}>
+                 ← Back
+             </button>
+         </div>
 <CryptoChart chartData={chartData} />
-<div>
-    <button onClick={()=>navigate("/dashboard")}>Back</button>
-</div>
+
 </div>
 </div>
  );

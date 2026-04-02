@@ -7,14 +7,10 @@ import "../styles/pages/dashboard.css";
 
 const Dashboard = () => {
   const [coins, setCoins] = useState([]);
-  const [selectedCoin, setSelectedCoin] = useState("bitcoin");
-  const [chartData, setChartData] = useState([]);
   const [currency, setCurrency] = useState("usd");
   const [perPage, setPerPage] = useState(10);
   const [days, setDays] = useState(1);
   const [loading, setLoading] = useState(false);
-
-
   /* =============================
         FETCH TOP COINS
   ============================== */
@@ -34,21 +30,6 @@ const Dashboard = () => {
     fetchCoins();
   }, [currency, perPage]);
 
-  /* =============================
-        FETCH CHART DATA
-  ============================== */
-  useEffect(() => {
-    const fetchChart = async () => {
-      try {
-        const res = await getChartData(selectedCoin, currency, days);
-        setChartData(res);
-      } catch (error) {
-        console.error("Error fetching chart:", error);
-      }
-    };
-
-    fetchChart();
-  }, [selectedCoin, currency, days]);
 
   return (
     <div className="dashboard-wrapper">
@@ -62,7 +43,6 @@ const Dashboard = () => {
         />
       </div>
 
-        <CryptoChart chartData={chartData} />
       {/* TABLE SECTION */}
       <div className="table-card">
         {loading ? (
@@ -70,7 +50,6 @@ const Dashboard = () => {
         ) : (
           <CryptoTable
             coins={coins}
-            setSelectedCoin={setSelectedCoin}
             currency={currency}
           />
         )}

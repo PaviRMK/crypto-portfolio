@@ -33,7 +33,7 @@ const PortfolioPage = ({ alerts = [] }) => {
   const [summary, setSummary] = useState(null);
   const [holdings, setHoldings] = useState([]);
   const [pnl, setPnl] = useState(null);
-  const [alerts, setAlerts] = useState([]);
+  // const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [downloading, setDownloading] = useState(false);
@@ -59,14 +59,11 @@ const PortfolioPage = ({ alerts = [] }) => {
         getHoldingsLive(userId),
         getPnlSummary(userId)
       ]);
-
-      const summaryData = await getPortfolioSummary(userId);
-      const holdingsData = await getHoldingsLive(userId);
-      const alertsData = await getRiskAlerts(userId);
+      // const alertsData = await getRiskAlerts(userId);
 
       setSummary(summaryData);
       setHoldings(holdingsData);
-      setAlerts(alertsData || []);
+      // setAlerts(alertsData || []);
       setPnl(pnlData);
 
     } catch (error) {
