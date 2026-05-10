@@ -9,41 +9,57 @@ import PortfolioPage from "./pages/PortfolioPage";
 import TradePage from "./pages/TradePage";
 
 import Navbar from "./Components/Navbar";
-import { getRiskAlerts } from "./services/portfolioApi";
+import { getPortfolioSummary, getRiskAlerts } from "./services/portfolioApi";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
+import { UserProvider } from "./contexts/UserContext";
 
 function App() {
 
   const [alerts, setAlerts] = useState([]);
+  const [portfolioSnapshot, setPortfolioSnapshot] = useState({
+    totalValue: 0,
+    totalPnl: 0
+  });
 
   const userId = localStorage.getItem("userId") || 1;
 
-  // 🔥 FETCH ONCE (MAIN FIX)
   useEffect(() => {
-    const loadAlerts = async () => {
+    const loadNavbarData = async () => {
       try {
-        const data = await getRiskAlerts(userId);
-        console.log("APP ALERTS:", data); // DEBUG
-        setAlerts(data || []);
+        const [alertData, summaryData] = await Promise.all([
+          getRiskAlerts(userId),
+          getPortfolioSummary(userId)
+        ]);
+
+        setAlerts(alertData || []);
+        setPortfolioSnapshot({
+          totalValue: summaryData?.totalValue ?? 0,
+          totalPnl: summaryData?.totalPnl ?? 0
+        });
       } catch (err) {
-        console.error("App Alerts Error:", err);
+        console.error("App navbar data error:", err);
       }
     };
 
-    loadAlerts();
+    loadNavbarData();
   }, [userId]);
 
   const Layout = ({ children }) => (
     <>
-      {/* ✅ PASS ALERTS HERE */}
-      <Navbar alerts={alerts} />
+      <Navbar
+        alerts={alerts}
+        portfolioSnapshot={portfolioSnapshot}
+      />
       {children}
     </>
   );
 
   return (
-    <Router>
+    <UserProvider>
+      <Router>
 
-      <Routes>
+        <Routes>
 
         <Route path="/" element={<Navigate to="/login" />} />
 
@@ -72,7 +88,6 @@ function App() {
           path="/portfolio"
           element={
             <Layout>
-              {/* ✅ PASS HERE ALSO (optional but good) */}
               <PortfolioPage alerts={alerts} />
             </Layout>
           }
@@ -82,15 +97,37 @@ function App() {
           path="/trade"
           element={
             <>
-              <Navbar alerts={alerts} />
+              <Navbar
+                alerts={alerts}
+                portfolioSnapshot={portfolioSnapshot}
+              />
               <TradePage />
             </>
           }
         />
 
-      </Routes>
+        <Route
+          path="/profile"
+          element={
+            <Layout>
+              <ProfilePage />
+            </Layout>
+          }
+        />
 
-    </Router>
+        <Route
+          path="/settings"
+          element={
+            <Layout>
+              <SettingsPage />
+            </Layout>
+          }
+        />
+
+        </Routes>
+
+      </Router>
+    </UserProvider>
   );
 }
 

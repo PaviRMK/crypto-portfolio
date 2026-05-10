@@ -20,13 +20,14 @@ public class CacheConfig {
                 "topCoins",
                 "chartData",
                 "livePrices",
-                "priceChange24h"
+                "priceChange24h",
+                "singlePrice"
         );
 
         cacheManager.setCaffeine(
                 Caffeine.newBuilder()
                         .maximumSize(1000)
-                        .expireAfterWrite(5, TimeUnit.MINUTES)
+                        .expireAfterWrite(60, TimeUnit.SECONDS)
         );
 
         return cacheManager;

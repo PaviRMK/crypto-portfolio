@@ -77,12 +77,18 @@
   opacity: 0.95;
 }
 
-.switch {
+.auth-left .switch,
+.register-left .switch {
   margin-top: 20px;
   font-size: 14px;
+  line-height: 1.5;
+  width: auto;
+  height: auto;
+  display: block;
 }
 
-.switch a {
+.auth-left .switch a,
+.register-left .switch a {
   font-weight: 600;
   color: #7b2ff7;
 }

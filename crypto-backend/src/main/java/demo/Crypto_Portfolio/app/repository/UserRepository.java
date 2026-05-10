@@ -5,7 +5,7 @@ import demo.Crypto_Portfolio.app.model.User;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByEmailAndPassword(String email, String password);
     Optional<User> findByEmail(String email);

@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import demo.Crypto_Portfolio.app.model.User;
 import demo.Crypto_Portfolio.app.service.UserService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -28,20 +31,27 @@ public class AuthController {
     }
 
     // LOGIN
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
 
-        boolean success = userService.login(
-                user.getEmail(),
-                user.getPassword()
-        );
+        String email = request.get("email");
+        String password = request.get("password");
 
-        if (!success) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid Email or Password");
+        boolean isValid = userService.login(email, password);
+
+        if (!isValid) {
+            return ResponseEntity.status(401).body("Invalid Email or Password");
         }
 
-        return ResponseEntity.ok("Login Successful");
+        // ✅ GENERATE TOKEN
+        String token = jwtUtil.generateToken(email);
+
+        // ✅ RETURN TOKEN (IMPORTANT)
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
     }
 
 }

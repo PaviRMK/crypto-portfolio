@@ -40,7 +40,7 @@ const groupAlerts = (alerts) => {
   return grouped;
 };
 
-const Notifications = ({ notifications = [], onClose }) => {
+const Notifications = ({ notifications = [], isOpen = false, onClose }) => {
 
   const [visibleAlerts, setVisibleAlerts] = useState([]);
 
@@ -48,6 +48,20 @@ const Notifications = ({ notifications = [], onClose }) => {
   useEffect(() => {
     setVisibleAlerts(notifications);
   }, [notifications]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("notifications-open");
+      return;
+    }
+    document.body.classList.remove("notifications-open");
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove("notifications-open");
+    };
+  }, []);
 
   const grouped = groupAlerts(visibleAlerts);
 
@@ -58,76 +72,85 @@ const Notifications = ({ notifications = [], onClose }) => {
   };
 
   return (
-    <div className="notification-panel">
+    <>
+      <div
+        className={`notifications-overlay ${isOpen ? "open" : ""}`}
+        onClick={onClose}
+      />
 
-      <div className="notification-header">
-        <h3>🔔 Risk & Market Alerts</h3>
-        <button onClick={onClose}>✖</button>
-      </div>
+      <aside className={`notification-panel ${isOpen ? "open" : ""}`}>
 
-      {visibleAlerts.length === 0 && (
-        <p className="empty-text">No alerts available</p>
-      )}
-
-      {Object.keys(grouped).map((group, gIndex) => (
-        <div key={gIndex} className="notification-group">
-
-          <h4 className="group-title">
-            {group} Alerts ({grouped[group].length})
-          </h4>
-
-          {grouped[group].map((alert, index) => {
-
-            const cleanMsg = formatMessage(
-              alert.message,
-              alert.assetSymbol
-            );
-
-            const severity = (alert.severity || "")
-              .toString()
-              .toUpperCase();
-
-            return (
-              <div
-                key={index}
-                className="notification-item unread"
-                style={{
-                  borderLeft: `4px solid ${getBorderColor(severity)}`
-                }}
-              >
-
-                <div className="notif-content">
-
-                  <span className="notif-icon">
-                    {getIcon(severity)}
-                  </span>
-
-                  <div className="notif-text">
-
-                    <p>
-                      <strong>{alert.assetSymbol || "Market"}</strong> → {cleanMsg}
-                      {severity && ` (${severity})`}
-                    </p>
-
-                    <span>{getTimeAgo()}</span>
-                  </div>
-
-                </div>
-
-                <div className="notif-actions">
-                  <button onClick={() => handleDismiss(alert)}>
-                    Dismiss
-                  </button>
-                </div>
-
-              </div>
-            );
-          })}
-
+        <div className="notification-header header">
+          <h3>Risk & Market Alerts</h3>
+          <button onClick={onClose} aria-label="Close notifications">✖</button>
         </div>
-      ))}
 
-    </div>
+        <div className="notification-list">
+          {visibleAlerts.length === 0 && (
+            <p className="empty-text">No alerts available</p>
+          )}
+
+          {Object.keys(grouped).map((group, gIndex) => (
+            <div key={gIndex} className="notification-group">
+
+              <h4 className="group-title">
+                {group} Alerts ({grouped[group].length})
+              </h4>
+
+              {grouped[group].map((alert, index) => {
+
+                const cleanMsg = formatMessage(
+                  alert.message,
+                  alert.assetSymbol
+                );
+
+                const severity = (alert.severity || "")
+                  .toString()
+                  .toUpperCase();
+
+                return (
+                  <div
+                    key={index}
+                    className="notification-item unread"
+                    style={{
+                      borderLeft: `4px solid ${getBorderColor(severity)}`
+                    }}
+                  >
+
+                    <div className="notif-content">
+
+                      <span className="notif-icon">
+                        {getIcon(severity)}
+                      </span>
+
+                      <div className="notif-text">
+
+                        <p>
+                          <strong>{alert.assetSymbol || "Market"}</strong> → {cleanMsg}
+                          {severity && ` (${severity})`}
+                        </p>
+
+                        <span>{getTimeAgo()}</span>
+                      </div>
+
+                    </div>
+
+                    <div className="notif-actions">
+                      <button onClick={() => handleDismiss(alert)}>
+                        Dismiss
+                      </button>
+                    </div>
+
+                  </div>
+                );
+              })}
+
+            </div>
+          ))}
+        </div>
+
+      </aside>
+    </>
   );
 };
 

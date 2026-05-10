@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import cryptoImage from "../assets/crypto.png";
 import { loginUser } from "../services/authApi";
+import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import "../styles/pages/login.css";
 
@@ -15,19 +16,39 @@ function Login() {
   const [messageType, setMessageType] = useState("");
 
   const navigate = useNavigate();
+  const { loadUserProfile } = useUser();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
 
-      const token = await loginUser({
+      const response = await loginUser({
         email,
         password
       });
 
-      // Store JWT token
+      const token = response?.data?.token;
+      console.log("[Login] token exists:", !!token);
+
+      if (!token) {
+        throw new Error("Token missing in login response");
+      }
+
+      // Store auth details for navbar/profile experiences.
       localStorage.setItem("token", token);
+      localStorage.setItem("userEmail", email);
+
+      if (!localStorage.getItem("userName")) {
+        const fallbackName = email.split("@")[0] || "Portfolio User";
+        localStorage.setItem("userName", fallbackName);
+      }
+
+      if (!localStorage.getItem("joinDate")) {
+        localStorage.setItem("joinDate", new Date().toISOString());
+      }
+
+      await loadUserProfile();
 
       setMessage("Login Successful");
       setMessageType("success");

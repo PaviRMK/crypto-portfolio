@@ -31,13 +31,20 @@ function Register() {
     }
 
     try {
-      const response = await registerUser({
+      const responseMessage = await registerUser({
         username: formData.username,
         email: formData.email,
         password: formData.password
       });
 
-      alert(response.data);
+      localStorage.setItem("userName", formData.username);
+      localStorage.setItem("userEmail", formData.email);
+
+      if (!localStorage.getItem("joinDate")) {
+        localStorage.setItem("joinDate", new Date().toISOString());
+      }
+
+      alert(responseMessage);
 
     } catch (error) {
       alert("Registration Failed");

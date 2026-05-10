@@ -108,7 +108,7 @@ public class CryptoService {
     // SINGLE LIVE PRICE
     // =========================
 
-    @Cacheable(value = "livePrices", key = "#symbol")
+    @Cacheable(value = "singlePrice", key = "#symbol")
     public double getLivePrice(String symbol) {
 
         String coinId = convertSymbolToCoinId(symbol);

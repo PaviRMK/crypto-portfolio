@@ -1,0 +1,122 @@
+.settings-page {
+  min-height: calc(100vh - 72px);
+  padding: 44px 90px;
+  background: radial-gradient(circle at 20% 0%, #11203b, #020617 70%);
+  color: #e2e8f0;
+}
+
+.settings-card {
+  max-width: 680px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 18px 34px rgba(0,0,0,0.32);
+}
+
+.settings-card h2 {
+  margin: 0 0 20px;
+  color: #f8fafc;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.setting-row.column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.setting-row h4 {
+  margin: 0 0 3px;
+  color: #f8fafc;
+}
+
+.setting-row p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.setting-row select {
+  width: 180px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.14);
+  padding: 8px 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.settings-page .switch {
+  position: relative;
+  width: 46px;
+  height: 26px;
+}
+
+.settings-page .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-page .slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 26px;
+  background: #334155;
+  transition: 0.25s;
+  cursor: pointer;
+}
+
+.settings-page .slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 4px;
+  bottom: 4px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: 0.25s;
+}
+
+.settings-page .switch input:checked + .slider {
+  background: #22c55e;
+}
+
+.settings-page .switch input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+.password-btn {
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.password-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 28px 16px;
+  }
+
+  .settings-card {
+    padding: 20px;
+  }
+}
