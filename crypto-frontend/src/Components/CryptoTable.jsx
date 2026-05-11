@@ -1,8 +1,7 @@
 import React from "react";
 import "../styles/components/table.css";
-
-
-const CryptoTable = ({ coins = [], setSelectedCoin, currency }) => {
+import  {useNavigate} from "react-router-dom"; 
+const CryptoTable = ({ coins = [], currency }) => {
 
   const symbolMap = {
     usd: "$",
@@ -10,7 +9,8 @@ const CryptoTable = ({ coins = [], setSelectedCoin, currency }) => {
     eur: "€",
     gbp: "£"
   };
-
+  const navigate=useNavigate();
+  
   const formatNumber = (num) => {
     if (!num) return "-";
     return num.toLocaleString();
@@ -33,7 +33,9 @@ const CryptoTable = ({ coins = [], setSelectedCoin, currency }) => {
           {coins.map((coin) => (
             <tr
               key={coin.id}
-              onClick={() => setSelectedCoin(coin.id)}
+              onClick={() => {
+                navigate(`/coins/${coin.id}`)
+              }}
             >
               {/* Coin Column */}
               <td>

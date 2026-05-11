@@ -19,6 +19,13 @@ import Papa from "papaparse";
 
 import "../styles/pages/portfolio.css";
 
+/* Toast Close Button */
+
+const ToastCloseButton = ({ closeToast }) => (
+  <button className="toast-close-btn" onClick={closeToast}>
+    ✕
+  </button>
+);
 const PortfolioPage = ({ alerts = [] }) => {
 
   const userId = localStorage.getItem("userId") || 1;
@@ -26,6 +33,7 @@ const PortfolioPage = ({ alerts = [] }) => {
   const [summary, setSummary] = useState(null);
   const [holdings, setHoldings] = useState([]);
   const [pnl, setPnl] = useState(null);
+  // const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [downloading, setDownloading] = useState(false);
@@ -51,13 +59,17 @@ const PortfolioPage = ({ alerts = [] }) => {
         getHoldingsLive(userId),
         getPnlSummary(userId)
       ]);
+      // const alertsData = await getRiskAlerts(userId);
 
       setSummary(summaryData);
       setHoldings(holdingsData);
+      // setAlerts(alertsData || []);
       setPnl(pnlData);
 
     } catch (error) {
-      console.error("Portfolio error:", error);
+
+      console.error("Portfolio API error", error);
+
     } finally {
       setLoading(false);
     }
@@ -200,7 +212,16 @@ const PortfolioPage = ({ alerts = [] }) => {
 
       <HoldingsTable holdings={holdings} alerts={alerts} />
 
-      <ToastContainer position="top-right" theme="dark" />
+        <ToastContainer
+            position="top-right"
+            autoClose={4000}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            theme="dark"
+            closeButton={ToastCloseButton}
+            style={{ marginTop: "60px" }}
+        />
 
     </div>
   );

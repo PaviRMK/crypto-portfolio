@@ -9,10 +9,14 @@ import PortfolioPage from "./pages/PortfolioPage";
 import TradePage from "./pages/TradePage";
 
 import Navbar from "./Components/Navbar";
+
 import { getPortfolioSummary, getRiskAlerts } from "./services/portfolioApi";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import { UserProvider } from "./contexts/UserContext";
+
+import { getRiskAlerts } from "./services/portfolioApi";
+import CoinDetails from "./pages/CoinDetails";
 
 function App() {
 
@@ -74,7 +78,11 @@ function App() {
             </Layout>
           }
         />
-
+          <Route path="/coins/:coinId" element={
+              <Layout><
+                  CoinDetails />
+              </Layout>
+          } />
         <Route
           path="/exchange"
           element={
